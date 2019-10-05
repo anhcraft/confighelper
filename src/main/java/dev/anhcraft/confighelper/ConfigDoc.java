@@ -2,9 +2,7 @@ package dev.anhcraft.confighelper;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
-import dev.anhcraft.confighelper.annotation.Schema;
 import dev.anhcraft.confighelper.annotation.Validation;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -55,8 +53,8 @@ public class ConfigDoc {
                         entry.getComponentClass().getSimpleName();
                 confBuilder.append("<tr><td>").append(key);
                 confBuilder.append("</td><td>");
-                if(entry.getConfigSchema() != null && schemas.contains(entry.getConfigSchema())){
-                    confBuilder.append("<a href=\"").append(entry.getConfigSchema().getSchemaClass().getSimpleName())
+                if(entry.getValueSchema() != null && schemas.contains(entry.getValueSchema())){
+                    confBuilder.append("<a href=\"").append(entry.getValueSchema().getSchemaClass().getSimpleName())
                             .append(".html\">").append(type).append("</a>");
                 } else {
                     confBuilder.append(type);

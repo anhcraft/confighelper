@@ -35,8 +35,8 @@ public class ConfigHelper {
             Object value = bukkitConf.get(k);
             value = configSchema.callMiddleware(entry, value, object, Middleware.Direction.CONFIG_TO_SCHEMA);
 
-            if(entry.getConfigSchema() != null && value instanceof ConfigurationSection){
-                value = readConfig((ConfigurationSection) value, entry.getConfigSchema());
+            if(entry.getValueSchema() != null && value instanceof ConfigurationSection){
+                value = readConfig((ConfigurationSection) value, entry.getValueSchema());
             } else  {
                 if(entry.getValidation() != null){
                     Validation validation = entry.getValidation();
@@ -80,14 +80,14 @@ public class ConfigHelper {
                     }
                 }
 
-                if(value != null && entry.getConfigSchema() != null && entry.getComponentClass() != null){
+                if(value != null && entry.getValueSchema() != null && entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(field.getType())){
                         List<?> olist = (List<?>) value;
                         if(!olist.isEmpty()){
                             List<Object> nlist = new ArrayList<>();
                             for(Object o : olist){
                                 if(o instanceof ConfigurationSection){
-                                    nlist.add(readConfig((ConfigurationSection) o, entry.getConfigSchema()));
+                                    nlist.add(readConfig((ConfigurationSection) o, entry.getValueSchema()));
                                 } else {
                                     nlist.add(o);
                                 }
@@ -102,7 +102,7 @@ public class ConfigHelper {
                             for(int i = 0; i < len; i++){
                                 Object o = Array.get(value, i);
                                 if(o instanceof ConfigurationSection){
-                                    Array.set(n, i, readConfig((ConfigurationSection) o, entry.getConfigSchema()));
+                                    Array.set(n, i, readConfig((ConfigurationSection) o, entry.getValueSchema()));
                                 } else {
                                     Array.set(n, i, o);
                                 }
@@ -132,10 +132,10 @@ public class ConfigHelper {
             Object value = configSchema.getValue(entry, object);
             value = configSchema.callMiddleware(entry, value, object, Middleware.Direction.SCHEMA_TO_CONFIG);
 
-            if(entry.getConfigSchema() != null && value != null) {
+            if(entry.getValueSchema() != null && value != null) {
                 if(value.getClass().isAnnotationPresent(Schema.class)){
                     YamlConfiguration conf = new YamlConfiguration();
-                    writeConfig(conf, entry.getConfigSchema(), value);
+                    writeConfig(conf, entry.getValueSchema(), value);
                     value = conf;
                 } else if(entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(entry.getField().getType())){
@@ -144,7 +144,7 @@ public class ConfigHelper {
                             List<ConfigurationSection> nlist = new ArrayList<>();
                             for(Object o : olist){
                                 YamlConfiguration conf = new YamlConfiguration();
-                                writeConfig(conf, entry.getConfigSchema(), o);
+                                writeConfig(conf, entry.getValueSchema(), o);
                                 nlist.add(conf);
                             }
                             value = nlist;
@@ -157,7 +157,7 @@ public class ConfigHelper {
                             for(int i = 0; i < len; i++){
                                 Object o = Array.get(value, i);
                                 YamlConfiguration conf = new YamlConfiguration();
-                                writeConfig(conf, entry.getConfigSchema(), o);
+                                writeConfig(conf, entry.getValueSchema(), o);
                                 n[i] = conf;
                             }
                             value = n;

@@ -281,7 +281,7 @@ public class ConfigSchema<T> {
         }
 
         @Nullable
-        public ConfigSchema<?> getConfigSchema() {
+        public ConfigSchema<?> getValueSchema() {
             return configSchema;
         }
 
