@@ -1,6 +1,10 @@
 package dev.anhcraft.confighelper;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
+import com.google.common.collect.TreeBasedTable;
 import dev.anhcraft.confighelper.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,6 +13,7 @@ import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 public class ConfigSchema<T> {
     @NotNull
@@ -154,6 +159,66 @@ public class ConfigSchema<T> {
             }
         }
         return value;
+    }
+
+    @NotNull
+    public String printMarkdownTable(){
+        StringBuilder builder = new StringBuilder("| Key | Type | Restriction | Explanation |\n")
+                .append("| - | - | - | - |\n");
+        for (Map.Entry<String, Entry> e : entries.entrySet()){
+            Entry entry = e.getValue();
+            String type = entry.componentClass == null ?
+                    entry.field.getType().getSimpleName() :
+                    entry.componentClass.getSimpleName();
+            builder.append("| ").append(e.getKey()).append(" | ").append(type);
+            if(entry.getValidation() == null){
+                builder.append(" |");
+            } else {
+                Validation validation = entry.getValidation();
+                StringBuilder vb = new StringBuilder();
+                if(validation.notNull())
+                    vb.append("**not-null** ");
+                if(validation.notEmptyString() || validation.notEmptyArray() || validation.notEmptyList())
+                    vb.append("**not-empty** ");
+                builder.append(" | ").append(vb).append(" |");
+            }
+            if(entry.getExplanation() == null){
+                builder.append(" | | ");
+            } else {
+                builder.append(" | ").append(Joiner.on(". ").join(entry.explanation.value())).append(" | ");
+            }
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
+
+    @NotNull
+    public String printMarkdownList(@NotNull String heading){
+        Preconditions.checkNotNull(heading);
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, Entry> e : entries.entrySet()){
+            Entry entry = e.getValue();
+            String type = entry.componentClass == null ?
+                    entry.field.getType().getSimpleName() :
+                    entry.componentClass.getSimpleName();
+            builder.append(heading).append(e.getKey()).append(" (").append(type).append(")");
+            if(entry.getExplanation() != null){
+                for(String s : entry.explanation.value()){
+                    builder.append("\n  - ").append(s);
+                }
+            }
+            if(entry.getValidation() != null){
+                Validation validation = entry.getValidation();
+                StringBuilder vb = new StringBuilder();
+                if(validation.notNull())
+                    vb.append("**not-null** ");
+                if(validation.notEmptyString() || validation.notEmptyArray() || validation.notEmptyList())
+                    vb.append("**not-empty** ");
+                builder.append("\n  - **Restriction**: ").append(vb);
+            }
+            builder.append("\n");
+        }
+        return builder.toString();
     }
 
     public static class Entry {

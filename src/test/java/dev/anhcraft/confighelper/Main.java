@@ -39,6 +39,7 @@ public class Main {
             house = ConfigHelper.readConfig(conf, House.STRUCT);
             ConfigHelper.writeConfig(conf, House.STRUCT, house);
             Assert.assertEquals(s, conf.saveToString());
+            System.out.println(Person.STRUCT.printMarkdownList("## "));
         } catch (InvalidValueException e) {
             e.printStackTrace();
         }
