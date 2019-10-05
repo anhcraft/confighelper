@@ -26,6 +26,10 @@ public class PersonSchema {
     @IgnoreValue(ifNull = true, ifEmptyList = true)
     public List<String> jobs = Collections.singletonList("worker");
 
-    @Key("favourite.number")
-    public double favNumber;
+    @Key("favourite.numbers")
+    public double[] favNumber = new double[]{ 0, 1, 2, 3 };
+
+    @Key("notes")
+    @Validation(notEmptyArray = true)
+    public String[] notes = new String[]{"Just a short note"};
 }

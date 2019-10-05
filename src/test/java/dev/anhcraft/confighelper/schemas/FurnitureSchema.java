@@ -10,7 +10,6 @@ public class FurnitureSchema {
     public static final SchemaStruct<FurnitureSchema> STRUCT = SchemaStruct.of(FurnitureSchema.class);
 
     @Key("id")
-    @Validation(notNull = true)
     public int id;
 
     @Key("material")
@@ -21,7 +20,6 @@ public class FurnitureSchema {
     public int damaged = 0;
 
     @Key("position")
-    @Validation(notNull = true)
     public Location position;
 
     @Middleware(Middleware.Direction.CONFIG_TO_SCHEMA)
