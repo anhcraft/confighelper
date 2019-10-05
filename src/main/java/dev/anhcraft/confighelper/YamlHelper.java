@@ -8,6 +8,7 @@ import dev.anhcraft.confighelper.annotation.Validation;
 import dev.anhcraft.confighelper.exception.InvalidValueException;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +23,7 @@ public class YamlHelper {
         return readConfig(bukkitConf, schemaStruct, schemaStruct.newInstance());
     }
 
-    @NotNull
+    @Contract("_, _, null -> null")
     public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct, @Nullable T schema) throws InvalidValueException {
         Preconditions.checkNotNull(bukkitConf);
         Preconditions.checkNotNull(schemaStruct);
@@ -121,7 +122,6 @@ public class YamlHelper {
         return schema;
     }
 
-    @NotNull
     public static <T> void writeConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct, @Nullable Object schema) {
         Preconditions.checkNotNull(bukkitConf);
         Preconditions.checkNotNull(schemaStruct);
