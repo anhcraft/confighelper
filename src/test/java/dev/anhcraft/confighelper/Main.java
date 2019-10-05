@@ -33,11 +33,11 @@ public class Main {
         family.getMembers().add(new Person());
         house.family = family;
         house.furniture.add(furniture);
-        YamlHelper.writeConfig(conf, House.STRUCT, house);
+        ConfigHelper.writeConfig(conf, House.STRUCT, house);
         String s = conf.saveToString();
         try {
-            house = YamlHelper.readConfig(conf, House.STRUCT);
-            YamlHelper.writeConfig(conf, House.STRUCT, house);
+            house = ConfigHelper.readConfig(conf, House.STRUCT);
+            ConfigHelper.writeConfig(conf, House.STRUCT, house);
             Assert.assertEquals(s, conf.saveToString());
         } catch (InvalidValueException e) {
             e.printStackTrace();

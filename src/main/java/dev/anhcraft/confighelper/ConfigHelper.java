@@ -17,7 +17,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class YamlHelper {
+public class ConfigHelper {
     @NotNull
     public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema) throws InvalidValueException {
         return readConfig(bukkitConf, configSchema, configSchema.newInstance());
