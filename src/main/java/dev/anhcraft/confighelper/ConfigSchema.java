@@ -2,16 +2,12 @@ package dev.anhcraft.confighelper;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Table;
-import com.google.common.collect.Tables;
-import com.google.common.collect.TreeBasedTable;
 import dev.anhcraft.confighelper.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.function.BiConsumer;
 
 public class ConfigSchema<T> {
     @NotNull
@@ -33,28 +29,35 @@ public class ConfigSchema<T> {
             Validation validation = f.getAnnotation(Validation.class);
             ConfigSchema ss = null;
             Class<?> componentClass = null;
+            boolean prettyEnum = f.getType().isEnum() && f.isAnnotationPresent(PrettyEnum.class);
 
             if(f.getType().isAnnotationPresent(Schema.class)) {
                 ss = fSchema(f.getType());
-            } else if(f.getType().isArray() && f.getType().getComponentType().isAnnotationPresent(Schema.class)){
+            } else if(f.getType().isArray()){
                 componentClass = f.getType().getComponentType();
-                ss = fSchema(componentClass);
+                if(componentClass.isAnnotationPresent(Schema.class)){
+                    ss = fSchema(componentClass);
+                } else if(componentClass.isEnum() && f.isAnnotationPresent(PrettyEnum.class)){
+                    prettyEnum = true;
+                }
             } else if(List.class.isAssignableFrom(f.getType())){
                 Type type = f.getGenericType();
                 if (type instanceof ParameterizedType) {
                     ParameterizedType pType = (ParameterizedType) type;
                     try {
                         Class<?> ac = Class.forName(pType.getActualTypeArguments()[0].getTypeName());
+                        componentClass = ac;
                         if(ac.isAnnotationPresent(Schema.class)){
-                            componentClass = ac;
                             ss = fSchema(ac);
+                        } else if(ac.isEnum() && f.isAnnotationPresent(PrettyEnum.class)){
+                            prettyEnum = true;
                         }
                     } catch (ClassNotFoundException ignored) {
                     }
                 }
             }
 
-            Entry e = new Entry(f, key, explanation, validation, ignoreValue, ss, componentClass);
+            Entry e = new Entry(f, key, explanation, validation, ignoreValue, prettyEnum, ss, componentClass);
             configSchema.entries.put(e.key.value(), e);
         }
 
@@ -241,10 +244,12 @@ public class ConfigSchema<T> {
         private Explanation explanation;
         private Validation validation;
         private IgnoreValue ignoreValue;
+        private boolean prettyEnum;
         private ConfigSchema configSchema;
         private Class<?> componentClass;
 
-        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, @Nullable ConfigSchema configSchema, @Nullable Class<?> componentClass) {
+        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, boolean prettyEnum, @Nullable ConfigSchema configSchema, @Nullable Class<?> componentClass) {
+            this.prettyEnum = prettyEnum;
             Preconditions.checkNotNull(field);
             this.field = field;
             this.key = key;
@@ -290,6 +295,10 @@ public class ConfigSchema<T> {
             return componentClass;
         }
 
+        public boolean isPrettyEnum() {
+            return prettyEnum;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -297,6 +306,7 @@ public class ConfigSchema<T> {
             Entry entry = (Entry) o;
             return field.equals(entry.field) &&
                     key.equals(entry.key) &&
+                    prettyEnum == entry.prettyEnum &&
                     Objects.equals(explanation, entry.explanation) &&
                     Objects.equals(validation, entry.validation) &&
                     Objects.equals(ignoreValue, entry.ignoreValue) &&

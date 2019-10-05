@@ -1,11 +1,13 @@
 package dev.anhcraft.confighelper;
 
 import com.google.common.base.Preconditions;
+import com.google.gson.internal.$Gson$Preconditions;
 import dev.anhcraft.confighelper.annotation.IgnoreValue;
 import dev.anhcraft.confighelper.annotation.Middleware;
 import dev.anhcraft.confighelper.annotation.Schema;
 import dev.anhcraft.confighelper.annotation.Validation;
 import dev.anhcraft.confighelper.exception.InvalidValueException;
+import org.apache.commons.lang.ClassUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Contract;
@@ -15,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ConfigHelper {
@@ -37,7 +40,9 @@ public class ConfigHelper {
 
             if(entry.getValueSchema() != null && value instanceof ConfigurationSection){
                 value = readConfig((ConfigurationSection) value, entry.getValueSchema());
-            } else  {
+            } else if(entry.isPrettyEnum() && value != null && String.class.isAssignableFrom(value.getClass())) {
+                value = Enum.valueOf((Class<? extends Enum>) field.getType(), (String) value);
+            } else {
                 if(entry.getValidation() != null){
                     Validation validation = entry.getValidation();
                     if(value != null){
@@ -80,14 +85,16 @@ public class ConfigHelper {
                     }
                 }
 
-                if(value != null && entry.getValueSchema() != null && entry.getComponentClass() != null){
+                if(value != null && entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(field.getType())){
                         List<?> olist = (List<?>) value;
                         if(!olist.isEmpty()){
                             List<Object> nlist = new ArrayList<>();
                             for(Object o : olist){
-                                if(o instanceof ConfigurationSection){
+                                if(entry.getValueSchema() != null && o instanceof ConfigurationSection){
                                     nlist.add(readConfig((ConfigurationSection) o, entry.getValueSchema()));
+                                } else if(entry.isPrettyEnum() && o instanceof String) {
+                                    nlist.add(Enum.valueOf((Class<? extends Enum>) entry.getComponentClass(), (String) o));
                                 } else {
                                     nlist.add(o);
                                 }
@@ -95,15 +102,17 @@ public class ConfigHelper {
                             value = nlist;
                         }
                     }
-                    if(field.getType().isArray()){
+                    else if(field.getType().isArray()){
                         int len = Array.getLength(value);
                         if(len > 0){
                             Object n = Array.newInstance(entry.getComponentClass(), len);
                             for(int i = 0; i < len; i++){
                                 Object o = Array.get(value, i);
-                                if(o instanceof ConfigurationSection){
+                                if(entry.getValueSchema() != null && o instanceof ConfigurationSection){
                                     Array.set(n, i, readConfig((ConfigurationSection) o, entry.getValueSchema()));
-                                } else {
+                                } else if(entry.isPrettyEnum() && o instanceof String) {
+                                    Array.set(n, i, Enum.valueOf((Class<? extends Enum>) entry.getComponentClass(), (String) o));
+                                } else if(!entry.getComponentClass().isPrimitive() || o != null) {
                                     Array.set(n, i, o);
                                 }
                             }
@@ -112,7 +121,6 @@ public class ConfigHelper {
                     }
                 }
             }
-
             try {
                 field.set(object, value);
             } catch (IllegalAccessException e) {
@@ -132,8 +140,10 @@ public class ConfigHelper {
             Object value = configSchema.getValue(entry, object);
             value = configSchema.callMiddleware(entry, value, object, Middleware.Direction.SCHEMA_TO_CONFIG);
 
-            if(entry.getValueSchema() != null && value != null) {
-                if(value.getClass().isAnnotationPresent(Schema.class)){
+            if(value != null) {
+                if(entry.isPrettyEnum() && value.getClass().isEnum()){
+                    value = value.toString();
+                } else if(entry.getValueSchema() != null && value.getClass().isAnnotationPresent(Schema.class)){
                     YamlConfiguration conf = new YamlConfiguration();
                     writeConfig(conf, entry.getValueSchema(), value);
                     value = conf;
@@ -141,26 +151,42 @@ public class ConfigHelper {
                     if(List.class.isAssignableFrom(entry.getField().getType())){
                         List<?> olist = (List<?>) value;
                         if(!olist.isEmpty()){
-                            List<ConfigurationSection> nlist = new ArrayList<>();
-                            for(Object o : olist){
-                                YamlConfiguration conf = new YamlConfiguration();
-                                writeConfig(conf, entry.getValueSchema(), o);
-                                nlist.add(conf);
+                            if(entry.isPrettyEnum()){
+                                List<Object> nlist = new ArrayList<>();
+                                for(Object o : olist){
+                                    nlist.add(o.toString());
+                                }
+                                value = nlist;
+                            } else if(entry.getValueSchema() != null){
+                                List<Object> nlist = new ArrayList<>();
+                                for(Object o : olist){
+                                    YamlConfiguration conf = new YamlConfiguration();
+                                    writeConfig(conf, entry.getValueSchema(), o);
+                                    nlist.add(conf);
+                                }
+                                value = nlist;
                             }
-                            value = nlist;
                         }
                     }
                     if(entry.getField().getType().isArray()){
                         int len = Array.getLength(value);
                         if(len > 0){
-                            ConfigurationSection[] n = new ConfigurationSection[len];
-                            for(int i = 0; i < len; i++){
-                                Object o = Array.get(value, i);
-                                YamlConfiguration conf = new YamlConfiguration();
-                                writeConfig(conf, entry.getValueSchema(), o);
-                                n[i] = conf;
+                            if(entry.isPrettyEnum()) {
+                                Object[] n = new Object[len];
+                                for (int i = 0; i < len; i++) {
+                                    n[i] = Array.get(value, i).toString();
+                                }
+                                value = n;
+                            } else if(entry.getValueSchema() != null){
+                                Object[] n = new Object[len];
+                                for (int i = 0; i < len; i++) {
+                                    Object o = Array.get(value, i);
+                                    YamlConfiguration conf = new YamlConfiguration();
+                                    writeConfig(conf, entry.getValueSchema(), o);
+                                    n[i] = conf;
+                                }
+                                value = n;
                             }
-                            value = n;
                         }
                     }
                 }
