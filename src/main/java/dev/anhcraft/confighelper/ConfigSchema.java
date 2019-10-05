@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +107,7 @@ public class ConfigSchema<T> {
     }
 
     @NotNull
-    public Iterable<String> listKeys(){
+    public Collection<String> listKeys(){
         return entries.keySet();
     }
 
