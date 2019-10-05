@@ -17,10 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class YamlHelper {
+    @NotNull
     public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct) throws InvalidValueException {
         return readConfig(bukkitConf, schemaStruct, schemaStruct.newInstance());
     }
 
+    @NotNull
     public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct, @Nullable T schema) throws InvalidValueException {
         Preconditions.checkNotNull(bukkitConf);
         Preconditions.checkNotNull(schemaStruct);
@@ -119,6 +121,7 @@ public class YamlHelper {
         return schema;
     }
 
+    @NotNull
     public static <T> void writeConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct, @Nullable Object schema) {
         Preconditions.checkNotNull(bukkitConf);
         Preconditions.checkNotNull(schemaStruct);

@@ -75,6 +75,7 @@ public class SchemaStruct<T> {
     private Constructor constructor;
 
     public SchemaStruct(@NotNull Class<T> schemaClass) {
+        Preconditions.checkNotNull(schemaClass);
         this.schemaClass = schemaClass;
         try {
             constructor = schemaClass.getConstructor();
@@ -141,7 +142,9 @@ public class SchemaStruct<T> {
     }
 
     @Nullable
-    Object callMiddleware(@NotNull SchemaStruct.Entry entry, @Nullable Object value, @Nullable Object schema, @NotNull Middleware.Direction dir) {
+    public Object callMiddleware(@NotNull SchemaStruct.Entry entry, @Nullable Object value, @Nullable Object schema, @NotNull Middleware.Direction dir) {
+        Preconditions.checkNotNull(entry);
+        Preconditions.checkNotNull(dir);
         for(Map.Entry<Method, Middleware.Direction> e : middleware.entrySet()){
             if(e.getValue() != Middleware.Direction.ALL && e.getValue() != dir) continue;
             try {
@@ -163,6 +166,7 @@ public class SchemaStruct<T> {
         private Class<?> componentClass;
 
         public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, @Nullable SchemaStruct schemaStruct, @Nullable Class<?> componentClass) {
+            Preconditions.checkNotNull(field);
             this.field = field;
             this.key = key;
             this.explanation = explanation;

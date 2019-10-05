@@ -23,7 +23,7 @@ public class InvalidValueException extends Exception {
 
     private static final long serialVersionUID = 6869299315041532364L;
 
-    public InvalidValueException(String key, Reason reason) {
+    public InvalidValueException(@NotNull String key, @NotNull Reason reason) {
         super(String.format("Value must not be %s (key = %s)", reason.prettyString, key));
     }
 }
