@@ -1,14 +1,14 @@
-package dev.anhcraft.confighelper.schemas;
+package dev.anhcraft.confighelper.objects;
 
 import dev.anhcraft.confighelper.annotation.*;
-import dev.anhcraft.confighelper.SchemaStruct;
+import dev.anhcraft.confighelper.ConfigSchema;
 
 import java.util.Collections;
 import java.util.List;
 
 @Schema
-public class PersonSchema {
-    public static final SchemaStruct<PersonSchema> STRUCT = SchemaStruct.of(PersonSchema.class);
+public class Person {
+    public static final ConfigSchema<Person> STRUCT = ConfigSchema.of(Person.class);
 
     @Key("name")
     @Explanation("Define the player's name")

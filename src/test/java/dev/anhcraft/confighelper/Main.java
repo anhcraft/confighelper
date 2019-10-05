@@ -2,10 +2,10 @@ package dev.anhcraft.confighelper;
 
 import com.google.common.collect.ImmutableList;
 import dev.anhcraft.confighelper.exception.InvalidValueException;
-import dev.anhcraft.confighelper.schemas.FamilySchema;
-import dev.anhcraft.confighelper.schemas.FurnitureSchema;
-import dev.anhcraft.confighelper.schemas.HouseSchema;
-import dev.anhcraft.confighelper.schemas.PersonSchema;
+import dev.anhcraft.confighelper.objects.Family;
+import dev.anhcraft.confighelper.objects.Furniture;
+import dev.anhcraft.confighelper.objects.House;
+import dev.anhcraft.confighelper.objects.Person;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.Assert;
@@ -15,12 +15,12 @@ public class Main {
     @Test
     public void test(){
         YamlConfiguration conf = new YamlConfiguration();
-        HouseSchema houseSchema = new HouseSchema();
-        FurnitureSchema furnitureSchema = new FurnitureSchema();
-        furnitureSchema.id = 0;
-        furnitureSchema.material = Material.CHEST;
-        FamilySchema familySchema = new FamilySchema();
-        PersonSchema ps = new PersonSchema();
+        House house = new House();
+        Furniture furniture = new Furniture();
+        furniture.id = 0;
+        furniture.material = Material.CHEST;
+        Family family = new Family();
+        Person ps = new Person();
         ps.name = "Alex";
         ps.age = 22;
         ps.jobs = ImmutableList.of("dev", "designer", "minecrafter");
@@ -29,17 +29,16 @@ public class Main {
                 "23/10: it is too boring, delete it tomorrow"
         };
         ps.favNumber = new double[]{ 9, 4 };
-        familySchema.getMembers().add(ps);
-        familySchema.getMembers().add(new PersonSchema());
-        houseSchema.family = familySchema;
-        houseSchema.furniture.add(furnitureSchema);
-        YamlHelper.writeConfig(conf, HouseSchema.STRUCT, houseSchema);
+        family.getMembers().add(ps);
+        family.getMembers().add(new Person());
+        house.family = family;
+        house.furniture.add(furniture);
+        YamlHelper.writeConfig(conf, House.STRUCT, house);
         String s = conf.saveToString();
         try {
-            houseSchema = YamlHelper.readConfig(conf, HouseSchema.STRUCT);
-            YamlHelper.writeConfig(conf, HouseSchema.STRUCT, houseSchema);
+            house = YamlHelper.readConfig(conf, House.STRUCT);
+            YamlHelper.writeConfig(conf, House.STRUCT, house);
             Assert.assertEquals(s, conf.saveToString());
-            System.out.println(s);
         } catch (InvalidValueException e) {
             e.printStackTrace();
         }

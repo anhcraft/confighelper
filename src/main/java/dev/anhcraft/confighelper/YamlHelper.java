@@ -19,24 +19,24 @@ import java.util.List;
 
 public class YamlHelper {
     @NotNull
-    public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct) throws InvalidValueException {
-        return readConfig(bukkitConf, schemaStruct, schemaStruct.newInstance());
+    public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema) throws InvalidValueException {
+        return readConfig(bukkitConf, configSchema, configSchema.newInstance());
     }
 
     @Contract("_, _, null -> null")
-    public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct, @Nullable T schema) throws InvalidValueException {
+    public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema, @Nullable T object) throws InvalidValueException {
         Preconditions.checkNotNull(bukkitConf);
-        Preconditions.checkNotNull(schemaStruct);
-        for (String k : schemaStruct.listKeys()){
-            SchemaStruct.Entry entry = schemaStruct.getEntry(k);
+        Preconditions.checkNotNull(configSchema);
+        for (String k : configSchema.listKeys()){
+            ConfigSchema.Entry entry = configSchema.getEntry(k);
             if(entry == null) continue;
             Field field = entry.getField();
 
             Object value = bukkitConf.get(k);
-            value = schemaStruct.callMiddleware(entry, value, schema, Middleware.Direction.CONFIG_TO_SCHEMA);
+            value = configSchema.callMiddleware(entry, value, object, Middleware.Direction.CONFIG_TO_SCHEMA);
 
-            if(entry.getSchemaStruct() != null && value instanceof ConfigurationSection){
-                value = readConfig((ConfigurationSection) value, entry.getSchemaStruct());
+            if(entry.getConfigSchema() != null && value instanceof ConfigurationSection){
+                value = readConfig((ConfigurationSection) value, entry.getConfigSchema());
             } else  {
                 if(entry.getValidation() != null){
                     Validation validation = entry.getValidation();
@@ -80,14 +80,14 @@ public class YamlHelper {
                     }
                 }
 
-                if(value != null && entry.getSchemaStruct() != null && entry.getComponentClass() != null){
+                if(value != null && entry.getConfigSchema() != null && entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(field.getType())){
                         List<?> olist = (List<?>) value;
                         if(!olist.isEmpty()){
                             List<Object> nlist = new ArrayList<>();
                             for(Object o : olist){
                                 if(o instanceof ConfigurationSection){
-                                    nlist.add(readConfig((ConfigurationSection) o, entry.getSchemaStruct()));
+                                    nlist.add(readConfig((ConfigurationSection) o, entry.getConfigSchema()));
                                 } else {
                                     nlist.add(o);
                                 }
@@ -102,7 +102,7 @@ public class YamlHelper {
                             for(int i = 0; i < len; i++){
                                 Object o = Array.get(value, i);
                                 if(o instanceof ConfigurationSection){
-                                    Array.set(n, i, readConfig((ConfigurationSection) o, entry.getSchemaStruct()));
+                                    Array.set(n, i, readConfig((ConfigurationSection) o, entry.getConfigSchema()));
                                 } else {
                                     Array.set(n, i, o);
                                 }
@@ -114,28 +114,28 @@ public class YamlHelper {
             }
 
             try {
-                field.set(schema, value);
+                field.set(object, value);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
-        return schema;
+        return object;
     }
 
-    public static <T> void writeConfig(@NotNull ConfigurationSection bukkitConf, @NotNull SchemaStruct<T> schemaStruct, @Nullable Object schema) {
+    public static <T> void writeConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema, @Nullable Object object) {
         Preconditions.checkNotNull(bukkitConf);
-        Preconditions.checkNotNull(schemaStruct);
-        for (String k : schemaStruct.listKeys()) {
-            SchemaStruct.Entry entry = schemaStruct.getEntry(k);
+        Preconditions.checkNotNull(configSchema);
+        for (String k : configSchema.listKeys()) {
+            ConfigSchema.Entry entry = configSchema.getEntry(k);
             if (entry == null) continue;
 
-            Object value = schemaStruct.getValue(entry, schema);
-            value = schemaStruct.callMiddleware(entry, value, schema, Middleware.Direction.SCHEMA_TO_CONFIG);
+            Object value = configSchema.getValue(entry, object);
+            value = configSchema.callMiddleware(entry, value, object, Middleware.Direction.SCHEMA_TO_CONFIG);
 
-            if(entry.getSchemaStruct() != null && value != null) {
+            if(entry.getConfigSchema() != null && value != null) {
                 if(value.getClass().isAnnotationPresent(Schema.class)){
                     YamlConfiguration conf = new YamlConfiguration();
-                    writeConfig(conf, entry.getSchemaStruct(), value);
+                    writeConfig(conf, entry.getConfigSchema(), value);
                     value = conf;
                 } else if(entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(entry.getField().getType())){
@@ -144,7 +144,7 @@ public class YamlHelper {
                             List<ConfigurationSection> nlist = new ArrayList<>();
                             for(Object o : olist){
                                 YamlConfiguration conf = new YamlConfiguration();
-                                writeConfig(conf, entry.getSchemaStruct(), o);
+                                writeConfig(conf, entry.getConfigSchema(), o);
                                 nlist.add(conf);
                             }
                             value = nlist;
@@ -157,7 +157,7 @@ public class YamlHelper {
                             for(int i = 0; i < len; i++){
                                 Object o = Array.get(value, i);
                                 YamlConfiguration conf = new YamlConfiguration();
-                                writeConfig(conf, entry.getSchemaStruct(), o);
+                                writeConfig(conf, entry.getConfigSchema(), o);
                                 n[i] = conf;
                             }
                             value = n;

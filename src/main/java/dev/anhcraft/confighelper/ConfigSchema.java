@@ -10,16 +10,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SchemaStruct<T> {
+public class ConfigSchema<T> {
     @NotNull
-    public static <T> SchemaStruct<T> of(@NotNull Class<T> schemaClass){
+    public static <T> ConfigSchema<T> of(@NotNull Class<T> schemaClass){
         Preconditions.checkNotNull(schemaClass);
         Preconditions.checkArgument(schemaClass.isAnnotationPresent(Schema.class), "No @schema found");
         return fSchema(schemaClass);
     }
 
-    private static <T> SchemaStruct<T> fSchema(Class<T> schemaClass){
-        SchemaStruct<T> schemaStruct = new SchemaStruct<>(schemaClass);
+    private static <T> ConfigSchema<T> fSchema(Class<T> schemaClass){
+        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass);
         Field[] fields = schemaClass.getDeclaredFields();
         for(Field f : fields) {
             f.setAccessible(true);
@@ -28,7 +28,7 @@ public class SchemaStruct<T> {
             Explanation explanation = f.getAnnotation(Explanation.class);
             IgnoreValue ignoreValue = f.getAnnotation(IgnoreValue.class);
             Validation validation = f.getAnnotation(Validation.class);
-            SchemaStruct ss = null;
+            ConfigSchema ss = null;
             Class<?> componentClass = null;
 
             if(f.getType().isAnnotationPresent(Schema.class)) {
@@ -52,7 +52,7 @@ public class SchemaStruct<T> {
             }
 
             Entry e = new Entry(f, key, explanation, validation, ignoreValue, ss, componentClass);
-            schemaStruct.entries.put(e.key.value(), e);
+            configSchema.entries.put(e.key.value(), e);
         }
 
         Method[] methods = schemaClass.getDeclaredMethods();
@@ -61,12 +61,12 @@ public class SchemaStruct<T> {
             Middleware middleware = m.getAnnotation(Middleware.class);
             if(middleware != null) {
                 Class<?>[] params = m.getParameterTypes();
-                if(params.length >= 2 && params[0].equals(SchemaStruct.Entry.class) && params[1].equals(Object.class) && !m.getReturnType().equals(Void.class)) {
-                    schemaStruct.middleware.put(m, middleware.value());
+                if(params.length >= 2 && params[0].equals(ConfigSchema.Entry.class) && params[1].equals(Object.class) && !m.getReturnType().equals(Void.class)) {
+                    configSchema.middleware.put(m, middleware.value());
                 }
             }
         }
-        return schemaStruct;
+        return configSchema;
     }
 
     private final Class<T> schemaClass;
@@ -74,7 +74,7 @@ public class SchemaStruct<T> {
     private final Map<Method, Middleware.Direction> middleware = new HashMap<>();
     private Constructor constructor;
 
-    public SchemaStruct(@NotNull Class<T> schemaClass) {
+    public ConfigSchema(@NotNull Class<T> schemaClass) {
         Preconditions.checkNotNull(schemaClass);
         this.schemaClass = schemaClass;
         try {
@@ -106,25 +106,25 @@ public class SchemaStruct<T> {
     }
 
     @Nullable
-    public SchemaStruct.Entry getEntry(@Nullable String key){
+    public ConfigSchema.Entry getEntry(@Nullable String key){
         return entries.get(key);
     }
 
     @Nullable
-    public Object getValue(@NotNull SchemaStruct.Entry entry, @Nullable Object schema){
-        return getValue(entry, schema, null);
+    public Object getValue(@NotNull ConfigSchema.Entry entry, @Nullable Object object){
+        return getValue(entry, object, null);
     }
 
     @Nullable
-    public Object getValue(@Nullable String key, @Nullable Object schema){
-        return getValue(key, schema, null);
+    public Object getValue(@Nullable String key, @Nullable Object object){
+        return getValue(key, object, null);
     }
 
     @Nullable
-    public Object getValue(@NotNull SchemaStruct.Entry entry, @Nullable Object schema, @Nullable Object defaultValue){
+    public Object getValue(@NotNull ConfigSchema.Entry entry, @Nullable Object object, @Nullable Object defaultValue){
         Preconditions.checkNotNull(entry);
         try {
-            return entry.getField().get(schema);
+            return entry.getField().get(object);
         } catch (IllegalAccessException e) {
             return defaultValue;
         }
@@ -142,13 +142,13 @@ public class SchemaStruct<T> {
     }
 
     @Nullable
-    public Object callMiddleware(@NotNull SchemaStruct.Entry entry, @Nullable Object value, @Nullable Object schema, @NotNull Middleware.Direction dir) {
+    public Object callMiddleware(@NotNull ConfigSchema.Entry entry, @Nullable Object value, @Nullable Object object, @NotNull Middleware.Direction dir) {
         Preconditions.checkNotNull(entry);
         Preconditions.checkNotNull(dir);
         for(Map.Entry<Method, Middleware.Direction> e : middleware.entrySet()){
             if(e.getValue() != Middleware.Direction.ALL && e.getValue() != dir) continue;
             try {
-                value = e.getKey().invoke(schema, entry, value);
+                value = e.getKey().invoke(object, entry, value);
             } catch (IllegalAccessException | InvocationTargetException ex) {
                 ex.printStackTrace();
             }
@@ -162,17 +162,17 @@ public class SchemaStruct<T> {
         private Explanation explanation;
         private Validation validation;
         private IgnoreValue ignoreValue;
-        private SchemaStruct schemaStruct;
+        private ConfigSchema configSchema;
         private Class<?> componentClass;
 
-        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, @Nullable SchemaStruct schemaStruct, @Nullable Class<?> componentClass) {
+        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, @Nullable ConfigSchema configSchema, @Nullable Class<?> componentClass) {
             Preconditions.checkNotNull(field);
             this.field = field;
             this.key = key;
             this.explanation = explanation;
             this.validation = validation;
             this.ignoreValue = ignoreValue;
-            this.schemaStruct = schemaStruct;
+            this.configSchema = configSchema;
             this.componentClass = componentClass;
         }
 
@@ -202,8 +202,8 @@ public class SchemaStruct<T> {
         }
 
         @Nullable
-        public SchemaStruct<?> getSchemaStruct() {
-            return schemaStruct;
+        public ConfigSchema<?> getConfigSchema() {
+            return configSchema;
         }
 
         @Nullable

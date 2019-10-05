@@ -1,13 +1,13 @@
-package dev.anhcraft.confighelper.schemas;
+package dev.anhcraft.confighelper.objects;
 
 import dev.anhcraft.confighelper.annotation.*;
-import dev.anhcraft.confighelper.SchemaStruct;
+import dev.anhcraft.confighelper.ConfigSchema;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
 @Schema
-public class FurnitureSchema {
-    public static final SchemaStruct<FurnitureSchema> STRUCT = SchemaStruct.of(FurnitureSchema.class);
+public class Furniture {
+    public static final ConfigSchema<Furniture> STRUCT = ConfigSchema.of(Furniture.class);
 
     @Key("id")
     public int id;
@@ -23,7 +23,7 @@ public class FurnitureSchema {
     public Location position;
 
     @Middleware(Middleware.Direction.CONFIG_TO_SCHEMA)
-    private Object onHandle1(SchemaStruct.Entry entry, Object value){
+    private Object onHandle1(ConfigSchema.Entry entry, Object value){
         if(entry.getKey().value().equals("material")){
             return Material.getMaterial(String.valueOf(value));
         }
@@ -31,7 +31,7 @@ public class FurnitureSchema {
     }
 
     @Middleware(Middleware.Direction.SCHEMA_TO_CONFIG)
-    public Object onHandle2(SchemaStruct.Entry entry, Object value){
+    public Object onHandle2(ConfigSchema.Entry entry, Object value){
         if(entry.getKey().value().equals("material")){
             return value.toString();
         }
