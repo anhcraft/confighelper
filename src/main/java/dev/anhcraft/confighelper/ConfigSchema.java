@@ -10,10 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class ConfigSchema<T> {
@@ -222,6 +219,22 @@ public class ConfigSchema<T> {
         return builder.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ConfigSchema<?> schema = (ConfigSchema<?>) o;
+        return schemaClass.equals(schema.schemaClass) &&
+                entries.equals(schema.entries) &&
+                middleware.equals(schema.middleware) &&
+                constructor.equals(schema.constructor);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(schemaClass);
+    }
+
     public static class Entry {
         private Field field;
         private Key key;
@@ -275,6 +288,25 @@ public class ConfigSchema<T> {
         @Nullable
         public Class<?> getComponentClass() {
             return componentClass;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Entry entry = (Entry) o;
+            return field.equals(entry.field) &&
+                    key.equals(entry.key) &&
+                    Objects.equals(explanation, entry.explanation) &&
+                    Objects.equals(validation, entry.validation) &&
+                    Objects.equals(ignoreValue, entry.ignoreValue) &&
+                    Objects.equals(configSchema, entry.configSchema) &&
+                    Objects.equals(componentClass, entry.componentClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(field, key);
         }
     }
 }
