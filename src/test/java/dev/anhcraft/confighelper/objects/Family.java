@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Schema
-public class Family {
+public class Family extends Generation {
     public static final ConfigSchema<Family> STRUCT = ConfigSchema.of(Family.class);
 
     @Key("members")

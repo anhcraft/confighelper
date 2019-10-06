@@ -3,6 +3,7 @@ package dev.anhcraft.confighelper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import dev.anhcraft.confighelper.annotation.*;
+import dev.anhcraft.confighelper.utils.ReflectUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,7 @@ public class ConfigSchema<T> {
 
     private static <T> ConfigSchema<T> fSchema(Class<T> schemaClass){
         ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass);
-        Field[] fields = schemaClass.getDeclaredFields();
+        Field[] fields = ReflectUtil.getAllFields(schemaClass);
         for(Field f : fields) {
             f.setAccessible(true);
             Key key = f.getAnnotation(Key.class);
