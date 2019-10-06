@@ -71,7 +71,7 @@ public class ConfigDoc {
                 }
                 confBuilder.append("</td><td>");
                 if(entry.getExplanation() != null){
-                    confBuilder.append(Joiner.on("<br>").join(entry.getExplanation().value()));
+                    confBuilder.append(Joiner.on("<br>").join(entry.getExplanation()));
                 }
                 confBuilder.append("</td></tr>");
             }

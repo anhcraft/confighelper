@@ -59,7 +59,7 @@ public class ConfigSchema<T> {
             }
 
             Entry e = new Entry(f, key, explanation, validation, ignoreValue, prettyEnum, ss, componentClass);
-            configSchema.entries.put(e.key.value(), e);
+            configSchema.entries.put(e.getKey(), e);
         }
 
         Method[] methods = schemaClass.getDeclaredMethods();
@@ -187,7 +187,7 @@ public class ConfigSchema<T> {
             if(entry.getExplanation() == null){
                 builder.append(" | | ");
             } else {
-                builder.append(" | ").append(Joiner.on(". ").join(entry.explanation.value())).append(" | ");
+                builder.append(" | ").append(Joiner.on(". ").join(entry.getExplanation())).append(" | ");
             }
             builder.append("\n");
         }
@@ -205,7 +205,7 @@ public class ConfigSchema<T> {
                     entry.componentClass.getSimpleName();
             builder.append(heading).append(e.getKey()).append(" (").append(type).append(")");
             if(entry.getExplanation() != null){
-                for(String s : entry.explanation.value()){
+                for(String s : entry.getExplanation()){
                     builder.append("\n  - ").append(s);
                 }
             }
@@ -267,13 +267,13 @@ public class ConfigSchema<T> {
         }
 
         @NotNull
-        public Key getKey() {
-            return key;
+        public String getKey() {
+            return key.value();
         }
 
         @Nullable
-        public Explanation getExplanation() {
-            return explanation;
+        public String[] getExplanation() {
+            return explanation.value();
         }
 
         @Nullable
