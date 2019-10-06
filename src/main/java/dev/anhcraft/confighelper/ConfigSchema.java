@@ -78,7 +78,6 @@ public class ConfigSchema<T> {
             }
             Middleware middleware = m.getAnnotation(Middleware.class);
             if(middleware != null) {
-                System.out.println(m.getName());
                 Class<?>[] params = m.getParameterTypes();
                 if(params.length >= 2 && params[0].equals(ConfigSchema.Entry.class) && params[1].equals(Object.class) && !m.getReturnType().equals(Void.class)) {
                     configSchema.middleware.put(m, middleware.value());
