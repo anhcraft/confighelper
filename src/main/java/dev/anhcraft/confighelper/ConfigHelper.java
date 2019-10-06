@@ -7,7 +7,9 @@ import dev.anhcraft.confighelper.annotation.Middleware;
 import dev.anhcraft.confighelper.annotation.Schema;
 import dev.anhcraft.confighelper.annotation.Validation;
 import dev.anhcraft.confighelper.exception.InvalidValueException;
+import dev.anhcraft.confighelper.utils.EnumUtil;
 import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.enums.EnumUtils;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.Contract;
@@ -40,9 +42,14 @@ public class ConfigHelper {
 
             if(entry.getValueSchema() != null && value instanceof ConfigurationSection){
                 value = readConfig((ConfigurationSection) value, entry.getValueSchema());
-            } else if(entry.isPrettyEnum() && value != null && String.class.isAssignableFrom(value.getClass())) {
-                value = Enum.valueOf((Class<? extends Enum>) field.getType(), (String) value);
             } else {
+                if(entry.isPrettyEnum() && value != null && String.class.isAssignableFrom(value.getClass())) {
+                    try {
+                        value = EnumUtil.findEnum((Class<? extends Enum>) field.getType(), (String) value);
+                    } catch (IllegalArgumentException e){
+                        value = null;
+                    }
+                }
                 if(entry.getValidation() != null){
                     Validation validation = entry.getValidation();
                     if(value != null){
