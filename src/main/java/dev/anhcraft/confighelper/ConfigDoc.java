@@ -43,7 +43,7 @@ public class ConfigDoc {
             Collection<String> keys = schema.listKeys();
             ovBuilder.append("<h3>").append("<a href=\"").append(title).append(".html\">").append(title).append("</a>: ").append(keys.size()).append(" entries </h3>");
 
-            StringBuilder confBuilder = new StringBuilder("<!Doctype html><html><head><title>Config | ").append(title).append("</title><meta charset=\"UTF-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><meta name=\"robots\" content=\"none\"/><style type=\"text/css\">body{font-family: monospace; font-size: 16px; padding: 25px 50px;}a{text-decoration: none; color: #19afdc;}table{width: 100%;}table th{font-size: 18px; background-color: #63c37c;}table, table td, table th{border: 1px solid #555; border-collapse: collapse; padding: 7px 12px;}</style></head><body><a href=\"index.html\">Overview</a> | <a href=\"javascript:window.history.back()\">Back</a><br/><br/><h1>").append(title).append("</h1><table><tr><th>Key</th><th>Type</th><th>Restriction</th><th>Explanation</th></tr>");
+            StringBuilder confBuilder = new StringBuilder("<!Doctype html><html><head><title>Config | ").append(title).append("</title><meta charset=\"UTF-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><meta name=\"robots\" content=\"none\"/><style type=\"text/css\">body{font-family: monospace; font-size: 16px; padding: 25px 50px;}a{text-decoration: none; color: #19afdc;}table{width: 100%;}table th{font-size: 18px; background-color: #63c37c;}table, table td, table th{border: 1px solid #555; border-collapse: collapse; padding: 7px 12px;}</style></head><body><a href=\"index.html\">Overview</a> | <a href=\"javascript:window.history.back()\">Back</a><br/><br/><h1>").append(title).append("</h1><table><tr><th>Key</th><th>Type</th><th>Explanation</th></tr>");
 
             for (String key : keys){
                 ConfigSchema.Entry entry = schema.getEntry(key);
@@ -53,23 +53,21 @@ public class ConfigDoc {
                         entry.getComponentClass().getSimpleName();
                 confBuilder.append("<tr><td>").append(key);
                 confBuilder.append("</td><td>");
+                StringBuilder vb = new StringBuilder(" ");
+                if(entry.getValidation() != null){
+                    Validation validation = entry.getValidation();
+                    if(validation.notNull())
+                        vb.append("<b>not-null</b> ");
+                    if(validation.notEmptyString() || validation.notEmptyArray() || validation.notEmptyList())
+                        vb.append("<b>not-empty</b> ");
+                }
                 if(entry.getValueSchema() != null && schemas.contains(entry.getValueSchema())){
                     confBuilder.append("<a href=\"").append(entry.getValueSchema().getSchemaClass().getSimpleName())
                             .append(".html\">").append(type).append("</a>");
                 } else {
                     confBuilder.append(type);
                 }
-                confBuilder.append("</td><td>");
-                if(entry.getValidation() != null){
-                    Validation validation = entry.getValidation();
-                    StringBuilder vb = new StringBuilder();
-                    if(validation.notNull())
-                        vb.append("<b>not-null</b> ");
-                    if(validation.notEmptyString() || validation.notEmptyArray() || validation.notEmptyList())
-                        vb.append("<b>not-empty</b> ");
-                    confBuilder.append(vb);
-                }
-                confBuilder.append("</td><td>");
+                confBuilder.append(vb).append("</td><td>");
                 if(entry.getExplanation() != null){
                     confBuilder.append(Joiner.on("<br>").join(entry.getExplanation()));
                 }
