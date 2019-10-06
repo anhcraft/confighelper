@@ -3,6 +3,7 @@ package dev.anhcraft.confighelper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import dev.anhcraft.confighelper.annotation.*;
+import dev.anhcraft.confighelper.impl.TwoWayMiddleware;
 import dev.anhcraft.confighelper.utils.ReflectUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,8 +66,19 @@ public class ConfigSchema<T> {
         Method[] methods = schemaClass.getDeclaredMethods();
         for(Method m : methods){
             m.setAccessible(true);
+            if(TwoWayMiddleware.class.isAssignableFrom(m.getDeclaringClass())){
+                if(m.getName().equals("conf2schema")){
+                    configSchema.middleware.put(m, Middleware.Direction.CONFIG_TO_SCHEMA);
+                    continue;
+                }
+                else if(m.getName().equals("schema2conf")){
+                    configSchema.middleware.put(m, Middleware.Direction.SCHEMA_TO_CONFIG);
+                    continue;
+                }
+            }
             Middleware middleware = m.getAnnotation(Middleware.class);
             if(middleware != null) {
+                System.out.println(m.getName());
                 Class<?>[] params = m.getParameterTypes();
                 if(params.length >= 2 && params[0].equals(ConfigSchema.Entry.class) && params[1].equals(Object.class) && !m.getReturnType().equals(Void.class)) {
                     configSchema.middleware.put(m, middleware.value());
