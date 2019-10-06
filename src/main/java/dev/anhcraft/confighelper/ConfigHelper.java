@@ -44,12 +44,9 @@ public class ConfigHelper {
                 value = readConfig((ConfigurationSection) value, entry.getValueSchema());
             } else {
                 if(entry.isPrettyEnum() && value != null && String.class.isAssignableFrom(value.getClass())) {
-                    try {
-                        value = EnumUtil.findEnum((Class<? extends Enum>) field.getType(), (String) value);
-                    } catch (IllegalArgumentException e){
-                        value = null;
-                    }
+                    value = EnumUtil.findEnum((Class<? extends Enum>) field.getType(), (String) value);
                 }
+
                 if(entry.getValidation() != null){
                     Validation validation = entry.getValidation();
                     if(value != null){
