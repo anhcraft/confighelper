@@ -101,7 +101,7 @@ public class ConfigHelper {
                                 if(entry.getValueSchema() != null && o instanceof ConfigurationSection){
                                     nlist.add(readConfig((ConfigurationSection) o, entry.getValueSchema()));
                                 } else if(entry.isPrettyEnum() && o instanceof String) {
-                                    nlist.add(Enum.valueOf((Class<? extends Enum>) entry.getComponentClass(), (String) o));
+                                    nlist.add(EnumUtil.findEnum((Class<? extends Enum>) entry.getComponentClass(), (String) o));
                                 } else {
                                     nlist.add(o);
                                 }
@@ -118,7 +118,7 @@ public class ConfigHelper {
                                 if(entry.getValueSchema() != null && o instanceof ConfigurationSection){
                                     Array.set(n, i, readConfig((ConfigurationSection) o, entry.getValueSchema()));
                                 } else if(entry.isPrettyEnum() && o instanceof String) {
-                                    Array.set(n, i, Enum.valueOf((Class<? extends Enum>) entry.getComponentClass(), (String) o));
+                                    Array.set(n, i, EnumUtil.findEnum((Class<? extends Enum>) entry.getComponentClass(), (String) o));
                                 } else if(!entry.getComponentClass().isPrimitive() || o != null) {
                                     Array.set(n, i, o);
                                 }
