@@ -90,24 +90,19 @@ public class ConfigSchema<T> {
     private final Class<T> schemaClass;
     private final Map<String, Entry> entries = new HashMap<>();
     private final Map<Method, Middleware.Direction> middleware = new HashMap<>();
-    private Constructor constructor;
 
     public ConfigSchema(@NotNull Class<T> schemaClass) {
         Preconditions.checkNotNull(schemaClass);
         this.schemaClass = schemaClass;
-        try {
-            constructor = schemaClass.getConstructor();
-            constructor.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
     }
 
     @SuppressWarnings("unchecked")
     T newInstance() {
         try {
+            Constructor constructor = schemaClass.getConstructor();
+            constructor.setAccessible(true);
             return (T) constructor.newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
         return null;
@@ -241,8 +236,7 @@ public class ConfigSchema<T> {
         ConfigSchema<?> schema = (ConfigSchema<?>) o;
         return schemaClass.equals(schema.schemaClass) &&
                 entries.equals(schema.entries) &&
-                middleware.equals(schema.middleware) &&
-                constructor.equals(schema.constructor);
+                middleware.equals(schema.middleware);
     }
 
     @Override
