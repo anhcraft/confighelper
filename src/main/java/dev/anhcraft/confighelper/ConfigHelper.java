@@ -155,7 +155,7 @@ public class ConfigHelper {
                     writeConfig(conf, entry.getValueSchema(), value);
                     value = conf;
                 } else if(entry.getComponentClass() != null){
-                    if(List.class.isAssignableFrom(entry.getField().getType())){
+                    if(List.class.isAssignableFrom(value.getClass())){
                         List<?> olist = (List<?>) value;
                         if(!olist.isEmpty()){
                             if(entry.isPrettyEnum()){
@@ -175,7 +175,7 @@ public class ConfigHelper {
                             }
                         }
                     }
-                    if(entry.getField().getType().isArray()){
+                    if(value.getClass().isArray()){
                         int len = Array.getLength(value);
                         if(len > 0){
                             if(entry.isPrettyEnum()) {
