@@ -20,6 +20,7 @@ public class EnumUtil {
             }
         }
 
+        name = name.toUpperCase();
         if(list.contains(name)) {
             return Enum.valueOf(clazz, name);
         } else {
