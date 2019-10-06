@@ -284,7 +284,7 @@ public class ConfigSchema<T> {
 
         @Nullable
         public String[] getExplanation() {
-            return explanation.value();
+            return explanation == null ? null : explanation.value();
         }
 
         @Nullable
