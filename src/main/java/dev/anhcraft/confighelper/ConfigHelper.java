@@ -128,10 +128,12 @@ public class ConfigHelper {
                     }
                 }
             }
-            try {
-                field.set(object, value);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            if(!field.getType().isPrimitive() || value != null) {
+                try {
+                    field.set(object, value);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return object;
