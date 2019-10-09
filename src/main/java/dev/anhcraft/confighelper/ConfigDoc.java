@@ -85,10 +85,10 @@ public class ConfigDoc {
             for (String key : keys){
                 ConfigSchema.Entry entry = schema.getEntry(key);
                 if(entry == null) continue;
-                String fullType = entry.getField().getType().getCanonicalName();
+                String fullType = entry.getField().getType().getName();
                 String type = entry.getField().getType().getSimpleName();
                 if(entry.getComponentClass() != null){
-                    fullType = entry.getComponentClass().getCanonicalName();
+                    fullType = entry.getComponentClass().getName();
                     if(!entry.getField().getType().isArray()){
                         type += "&lt;" + entry.getComponentClass().getSimpleName()+"&gt;";
                     }
@@ -109,7 +109,7 @@ public class ConfigDoc {
                     boolean found = false;
                     for(Map.Entry<Pattern, String> jd : javaDocs.entrySet()){
                         if(jd.getKey().matcher(fullType).matches()){
-                            confBuilder.append("<a href=\"").append(jd.getValue()).append(fullType.replace('.', '/')).append(".html\">").append(type).append("</a>");
+                            confBuilder.append("<a href=\"").append(jd.getValue()).append(fullType.replace('.', '/').replace('$', '.')).append(".html\">").append(type).append("</a>");
                             found = true;
                             break;
                         }
