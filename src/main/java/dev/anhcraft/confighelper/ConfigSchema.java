@@ -4,7 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import dev.anhcraft.confighelper.annotation.*;
 import dev.anhcraft.confighelper.impl.TwoWayMiddleware;
-import dev.anhcraft.confighelper.utils.ReflectUtil;
+import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +21,12 @@ public class ConfigSchema<T> {
 
     private static <T> ConfigSchema<T> fSchema(Class<T> schemaClass){
         ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass);
-        Field[] fields = ReflectUtil.getAllFields(schemaClass);
+        Class<?> clazz = schemaClass;
+        Field[] fields = clazz.getDeclaredFields();
+        while(!Objects.equals(clazz = clazz.getSuperclass(), Object.class)){
+            if(!clazz.isAnnotationPresent(Schema.class)) break;
+            fields = (Field[]) ArrayUtils.addAll(fields, clazz.getDeclaredFields());
+        }
         for(Field f : fields) {
             f.setAccessible(true);
             Key key = f.getAnnotation(Key.class);
