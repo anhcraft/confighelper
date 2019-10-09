@@ -64,7 +64,7 @@ public class ConfigDoc {
         Preconditions.checkNotNull(output);
         output.mkdirs();
 
-        StringBuilder ovBuilder = new StringBuilder("<!Doctype html><html><head><title>Overview</title><meta charset=\"UTF-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><meta name=\"robots\" content=\"none\"/><style type=\"text/css\">body{font-family: monospace; font-size: 16px; padding: 25px 50px;margin-bottom: 200px;}a{text-decoration: none; color: #19afdc;}footer{position: fixed; left: 0; bottom: 0; background: #f2d9ff; width: 100%; padding: 5px; text-align: center;}</style></head><body><h1>Overview</h1><br>");
+        StringBuilder ovBuilder = new StringBuilder("<!Doctype html><html><head><title>Overview</title><meta charset=\"UTF-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><meta name=\"robots\" content=\"none\"/><style type=\"text/css\">body{font-family: monospace; font-size: 16px; padding: 25px 50px;margin-bottom: 200px;}a{text-decoration: none; color: #19afdc;}footer{position: fixed; left: 0; bottom: 0; background: #f2d9ff; width: 100%; padding: 5px; text-align: center;font-size: 14px;box-shadow: #676767 1px 1px 10px;}</style></head><body><h1>Overview</h1><br>");
 
         StringBuilder sideMenuBuilder = new StringBuilder();
 
