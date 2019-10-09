@@ -1,8 +1,7 @@
 package dev.anhcraft.confighelper.objects;
 
-import dev.anhcraft.confighelper.annotation.IgnoreValue;
-import dev.anhcraft.confighelper.annotation.Key;
-import dev.anhcraft.confighelper.annotation.Schema;
+import dev.anhcraft.confighelper.annotation.*;
+import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,17 @@ public class House {
     @IgnoreValue(ifNull = true)
     private List<Human> people = new ArrayList<>();
 
+    @Key("material")
+    @Explanation("The material that makes up this house")
+    @IgnoreValue(ifNull = true)
+    @PrettyEnum
+    private Material material = Material.WOOD;
+
     public List<Human> getPeople() {
         return people;
+    }
+
+    public Material getMaterial() {
+        return material;
     }
 }
