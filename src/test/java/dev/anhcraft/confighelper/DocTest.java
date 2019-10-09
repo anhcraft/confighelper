@@ -1,9 +1,6 @@
 package dev.anhcraft.confighelper;
 
-import dev.anhcraft.confighelper.objects.Family;
-import dev.anhcraft.confighelper.objects.Furniture;
-import dev.anhcraft.confighelper.objects.House;
-import dev.anhcraft.confighelper.objects.Person;
+import dev.anhcraft.confighelper.objects.*;
 import org.junit.Test;
 
 import java.io.File;
@@ -12,10 +9,12 @@ public class DocTest {
     @Test
     public void doc(){
         new ConfigDoc()
-                .withSchemaOf(Family.class)
-                .withSchemaOf(Furniture.class)
+                .withSchema(Earth.SCHEMA)
+                .withSchemaOf(Ageable.class)
+                .withSchemaOf(Country.class)
+                .withSchemaOf(Town.class)
                 .withSchemaOf(House.class)
-                .withSchemaOf(Person.class)
+                .withSchemaOf(Human.class)
                 .generate(new File("docs"));
     }
 }

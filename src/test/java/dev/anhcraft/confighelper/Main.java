@@ -1,12 +1,8 @@
 package dev.anhcraft.confighelper;
 
-import com.google.common.collect.ImmutableList;
+import dev.anhcraft.confighelper.enums.Gender;
 import dev.anhcraft.confighelper.exception.InvalidValueException;
-import dev.anhcraft.confighelper.objects.Family;
-import dev.anhcraft.confighelper.objects.Furniture;
-import dev.anhcraft.confighelper.objects.House;
-import dev.anhcraft.confighelper.objects.Person;
-import org.bukkit.Material;
+import dev.anhcraft.confighelper.objects.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,34 +10,41 @@ import org.junit.Test;
 public class Main {
     @Test
     public void test(){
-        YamlConfiguration conf = new YamlConfiguration();
-        House house = new House();
-        Furniture furniture = new Furniture();
-        furniture.id = 0;
-        furniture.material = Material.CHEST;
-        Family family = new Family();
-        Person ps = new Person();
-        ps.name = "Alex";
-        ps.age = 22;
-        ps.jobs = ImmutableList.of("dev", "designer", "minecrafter");
-        ps.notes = new String[]{
-                "22/10: Ok myself, I wanna making my own server",
-                "23/10: it is too boring, delete it tomorrow"
-        };
-        ps.favNumber = new double[]{ 9, 4 };
-        family.getMembers().add(ps);
-        family.getMembers().add(new Person());
-        house.family = family;
-        house.furniture.add(furniture);
-        ConfigHelper.writeConfig(conf, House.STRUCT, house);
-        String s = conf.saveToString();
+        Human human1 = new Human();
+        human1.setGender(Gender.FEMALE);
+        human1.setName("Alex");
+        human1.setAge(20);
+        Human human2 = new Human();
+        human2.setGender(Gender.MALE);
+        human2.setName("Steve");
+        human2.setAge(23);
+        Human human3 = new Human();
+        human3.setGender(Gender.GAY);
+        human3.setName("Endermen");
+        human3.setAge(-99);
+        House house1 = new House();
+        house1.getPeople().add(human1);
+        house1.getPeople().add(human2);
+        House house2 = new House();
+        house2.getPeople().add(human3);
+        Town town = new Town();
+        town.setHouses(new House[]{house1, house2});
+        Country country = new Country();
+        country.setName("The kingdom of North");
+        country.getTowns().add(town);
+        Earth earth = new Earth();
+        earth.setAge(2000000);
+        earth.getCountries().add(country);
+        YamlConfiguration configuration1 = new YamlConfiguration();
+        ConfigHelper.writeConfig(configuration1, Earth.SCHEMA, earth);
+        String conf = configuration1.saveToString();
+        System.out.println(conf);
+        YamlConfiguration configuration2 = new YamlConfiguration();
         try {
-            house = ConfigHelper.readConfig(conf, House.STRUCT);
-            ConfigHelper.writeConfig(conf, House.STRUCT, house);
-            Assert.assertEquals(s, conf.saveToString());
-            System.out.println(s);
+            ConfigHelper.writeConfig(configuration2, Earth.SCHEMA, ConfigHelper.readConfig(configuration1, Earth.SCHEMA));
         } catch (InvalidValueException e) {
             e.printStackTrace();
         }
+        Assert.assertEquals(conf, configuration2.saveToString());
     }
 }
