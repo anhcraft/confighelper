@@ -10,13 +10,18 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class ConfigDoc {
     private final List<ConfigSchema<?>> schemas = new ArrayList<>();
+    private final Map<Pattern, String> javaDocs = new HashMap<>();
     private String footer = "<footer>Powered by ConfigDoc/<a href=\"https://github.com/anhcraft/confighelper/\">ConfigHelper</a></footer>";
+
+    public ConfigDoc(){
+        addJavadoc("(org.bukkit.*)|(org.spigotmc*)", "https://hub.spigotmc.org/javadocs/spigot/");
+        addJavadoc("(com.destroystokyo.paper*)", "https://papermc.io/javadocs/paper/1.14/");
+    }
 
     @Contract("_ -> this")
     public ConfigDoc withSchema(@NotNull ConfigSchema<?> schema){
@@ -36,6 +41,21 @@ public class ConfigDoc {
     public ConfigDoc footer(@NotNull String footer){
         Preconditions.checkNotNull(footer);
         this.footer = footer;
+        return this;
+    }
+
+    @Contract("_, _ -> this")
+    public ConfigDoc addJavadoc(@NotNull String classPattern, @NotNull String link){
+        Preconditions.checkNotNull(classPattern);
+        return addJavadoc(Pattern.compile(classPattern), link);
+    }
+
+    @Contract("_, _ -> this")
+    public ConfigDoc addJavadoc(@NotNull Pattern classPattern, @NotNull String link){
+        Preconditions.checkNotNull(classPattern);
+        Preconditions.checkNotNull(footer);
+        if(!link.endsWith("/")) link = link + '/';
+        javaDocs.put(classPattern, link);
         return this;
     }
 
@@ -65,9 +85,14 @@ public class ConfigDoc {
             for (String key : keys){
                 ConfigSchema.Entry entry = schema.getEntry(key);
                 if(entry == null) continue;
-                String type = entry.getComponentClass() == null ?
-                        entry.getField().getType().getSimpleName() :
-                        entry.getComponentClass().getSimpleName();
+                String fullType = entry.getField().getType().getCanonicalName();
+                String type = entry.getField().getType().getSimpleName();
+                if(entry.getComponentClass() != null){
+                    fullType = entry.getComponentClass().getCanonicalName();
+                    if(!entry.getField().getType().isArray()){
+                        type += "&lt;" + entry.getComponentClass().getSimpleName()+"&gt;";
+                    }
+                }
                 confBuilder.append("<tr><td>").append(key);
                 confBuilder.append("</td><td>");
                 StringBuilder vb = new StringBuilder(" ");
@@ -79,10 +104,17 @@ public class ConfigDoc {
                         vb.append("<b>not-empty</b> ");
                 }
                 if(entry.getValueSchema() != null && schemas.contains(entry.getValueSchema())){
-                    confBuilder.append("<a href=\"").append(entry.getValueSchema().getSchemaClass().getSimpleName())
-                            .append(".html\">").append(type).append("</a>");
+                    confBuilder.append("<a href=\"").append(entry.getValueSchema().getSchemaClass().getSimpleName()).append(".html\">").append(type).append("</a>");
                 } else {
-                    confBuilder.append(type);
+                    boolean found = false;
+                    for(Map.Entry<Pattern, String> jd : javaDocs.entrySet()){
+                        if(jd.getKey().matcher(fullType).matches()){
+                            confBuilder.append("<a href=\"").append(jd.getValue()).append(fullType.replace('.', '/')).append(".html\">").append(type).append("</a>");
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found) confBuilder.append(type);
                 }
                 confBuilder.append(vb).append("</td><td>");
                 if(entry.getExplanation() != null){
