@@ -30,7 +30,7 @@ public class Main {
         Town town = new Town();
         town.setHouses(new House[]{house1, house2});
         Country country = new Country();
-        country.setName("The kingdom of North");
+        country.setName("Minecraft");
         country.getTowns().add(town);
         Earth earth = new Earth();
         earth.setAge(2000000);
