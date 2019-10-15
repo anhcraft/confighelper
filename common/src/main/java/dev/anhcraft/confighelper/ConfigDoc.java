@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -21,6 +22,14 @@ public class ConfigDoc {
     public ConfigDoc(){
         addJavadoc("(org.bukkit.*)|(org.spigotmc*)", "https://hub.spigotmc.org/javadocs/spigot/");
         addJavadoc("(com.destroystokyo.paper*)", "https://papermc.io/javadocs/paper/1.14/");
+    }
+
+    @Contract("_ -> this")
+    public ConfigDoc with(@NotNull ConfigDoc configDoc){
+        Preconditions.checkNotNull(configDoc);
+        schemas.addAll(configDoc.schemas);
+        javaDocs.putAll(configDoc.javaDocs);
+        return this;
     }
 
     @Contract("_ -> this")
@@ -85,16 +94,17 @@ public class ConfigDoc {
             for (String key : keys){
                 ConfigSchema.Entry entry = schema.getEntry(key);
                 if(entry == null) continue;
-                String fullType = entry.getField().getType().getName();
-                String type = entry.getField().getType().getSimpleName();
+                Field field = entry.getField();
+                String fullType = field.getType().getName();
+                StringBuilder type = new StringBuilder(field.getType().getSimpleName());
                 if(entry.getComponentClass() != null){
                     fullType = entry.getComponentClass().getName();
-                    if(!entry.getField().getType().isArray()){
-                        type += "&lt;" + entry.getComponentClass().getSimpleName()+"&gt;";
+                    if(!field.getType().isArray()){
+                        type.append("&lt;").append(entry.getComponentClass().getSimpleName()).append("&gt;");
                     }
                 }
-                confBuilder.append("<tr><td>").append(key);
-                confBuilder.append("</td><td>");
+                confBuilder.append("<tr><td>").append(key)
+                        .append("</td><td>");
                 StringBuilder vb = new StringBuilder(" ");
                 if(entry.getValidation() != null){
                     Validation validation = entry.getValidation();
