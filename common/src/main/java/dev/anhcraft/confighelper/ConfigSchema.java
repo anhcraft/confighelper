@@ -3,7 +3,7 @@ package dev.anhcraft.confighelper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import dev.anhcraft.confighelper.annotation.*;
-import org.apache.commons.lang.ArrayUtils;
+import dev.anhcraft.confighelper.utils.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,8 +36,8 @@ public class ConfigSchema<T> {
             if(!tempClazz.isAnnotationPresent(Schema.class)) {
                 break;
             }
-            fields = (Field[]) ArrayUtils.addAll(fields, tempClazz.getDeclaredFields());
-            methods = (Method[]) ArrayUtils.addAll(methods, tempClazz.getDeclaredMethods());
+            fields = (Field[]) ArrayUtil.concat(fields, tempClazz.getDeclaredFields());
+            methods = (Method[]) ArrayUtil.concat(methods, tempClazz.getDeclaredMethods());
         }
 
         for(Field f : fields) {
@@ -86,7 +86,7 @@ public class ConfigSchema<T> {
             Middleware middleware = m.getAnnotation(Middleware.class);
             if(middleware != null) {
                 Class<?>[] params = m.getParameterTypes();
-                if(params.length >= 2 && params[0].equals(ConfigSchema.Entry.class) && params[1].equals(Object.class) && !m.getReturnType().equals(Void.class)) {
+                if(params.length >= 2 && params[0].equals(Entry.class) && params[1].equals(Object.class) && !m.getReturnType().equals(Void.class)) {
                     configSchema.middleware.put(m, middleware.value());
                 }
             }

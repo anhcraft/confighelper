@@ -8,6 +8,12 @@
     <artifactId>confighelper</artifactId>
     <version>1.0.2</version>
 
+    <modules>
+        <module>common</module>
+        <module>bungee</module>
+        <module>bukkit</module>
+    </modules>
+
     <developers>
         <developer>
             <name>anhcraft</name>
@@ -18,6 +24,10 @@
         <repository>
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>bungeecord-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
     </repositories>
 
@@ -36,12 +46,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.9.4-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
