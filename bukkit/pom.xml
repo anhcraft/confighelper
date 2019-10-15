@@ -17,7 +17,7 @@
             <groupId>dev.anhcraft</groupId>
             <artifactId>confighelper.common</artifactId>
             <version>1.0.2</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
