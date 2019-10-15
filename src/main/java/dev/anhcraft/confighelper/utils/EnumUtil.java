@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public class EnumUtil {
     private static final Map<Class<? extends Enum>, List<String>> ENUM_MAP = new WeakHashMap<>();
 
-    public static synchronized <T extends Enum> Object findEnum(Class<T> clazz, String name){
+    public static <T extends Enum> Object findEnum(Class<T> clazz, String name){
         List<String> list = ENUM_MAP.get(clazz);
         if(list == null) {
             if(clazz.isEnum()){
