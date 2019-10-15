@@ -72,16 +72,6 @@ public class ConfigSchema<T> {
 
         for(Method m : methods){
             m.setAccessible(true);
-            if(TwoWayMiddleware.class.isAssignableFrom(m.getDeclaringClass())){
-                if(m.getName().equals("conf2schema")){
-                    configSchema.middleware.put(m, Middleware.Direction.CONFIG_TO_SCHEMA);
-                    continue;
-                }
-                else if(m.getName().equals("schema2conf")){
-                    configSchema.middleware.put(m, Middleware.Direction.SCHEMA_TO_CONFIG);
-                    continue;
-                }
-            }
             Middleware middleware = m.getAnnotation(Middleware.class);
             if(middleware != null) {
                 Class<?>[] params = m.getParameterTypes();
