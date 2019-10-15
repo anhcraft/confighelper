@@ -23,9 +23,11 @@ public class ConfigSchema<T> {
         ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass);
         Class<?> clazz = schemaClass;
         Field[] fields = clazz.getDeclaredFields();
+        Method[] methods = clazz.getDeclaredMethods();
         while(!Objects.equals(clazz = clazz.getSuperclass(), Object.class)){
             if(!clazz.isAnnotationPresent(Schema.class)) break;
             fields = (Field[]) ArrayUtils.addAll(fields, clazz.getDeclaredFields());
+            methods = (Method[]) ArrayUtils.addAll(methods, clazz.getDeclaredMethods());
         }
         for(Field f : fields) {
             f.setAccessible(true);
@@ -68,7 +70,6 @@ public class ConfigSchema<T> {
             configSchema.entries.put(e.getKey(), e);
         }
 
-        Method[] methods = schemaClass.getDeclaredMethods();
         for(Method m : methods){
             m.setAccessible(true);
             if(TwoWayMiddleware.class.isAssignableFrom(m.getDeclaringClass())){
