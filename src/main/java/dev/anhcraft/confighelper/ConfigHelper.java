@@ -32,9 +32,12 @@ public class ConfigHelper {
     public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema, @Nullable T object) throws InvalidValueException {
         Preconditions.checkNotNull(bukkitConf);
         Preconditions.checkNotNull(configSchema);
+
         for (String k : configSchema.listKeys()){
             ConfigSchema.Entry entry = configSchema.getEntry(k);
-            if(entry == null) continue;
+            if(entry == null) {
+                continue;
+            }
             Field field = entry.getField();
 
             Object value = bukkitConf.get(k);
@@ -48,53 +51,53 @@ public class ConfigHelper {
                 }
 
                 if(entry.getValidation() != null){
-                    Validation validation = entry.getValidation();
+                    Validation v = entry.getValidation();
                     if(value != null){
-                        if(validation.notEmptyArray() && Array.getLength(value) == 0){
+                        if(v.notEmptyArray() && Array.getLength(value) == 0){
                             throw new InvalidValueException(k, InvalidValueException.Reason.EMPTY_ARRAY);
                         }
-                        if(validation.notEmptyList() && List.class.isAssignableFrom(field.getType())){
+                        if(v.notEmptyList() && List.class.isAssignableFrom(field.getType())){
                             if(((List) value).isEmpty()){
                                 throw new InvalidValueException(k, InvalidValueException.Reason.EMPTY_COLLECTION);
                             }
                         }
-                        if(validation.notEmptyString() && CharSequence.class.isAssignableFrom(field.getType())){
+                        if(v.notEmptyString() && CharSequence.class.isAssignableFrom(field.getType())){
                             if(((CharSequence) value).length() == 0){
                                 throw new InvalidValueException(k, InvalidValueException.Reason.EMPTY_STRING);
                             }
                         }
-                    } else if(validation.notNull()){
+                    } else if(v.notNull()){
                         throw new InvalidValueException(k, InvalidValueException.Reason.NULL);
                     }
                 }
 
                 if(entry.getIgnoreValue() != null){
-                    IgnoreValue ignoreValue = entry.getIgnoreValue();
+                    IgnoreValue iv = entry.getIgnoreValue();
                     if(value != null){
-                        if(ignoreValue.ifEmptyArray() && Array.getLength(value) == 0){
+                        if(iv.ifEmptyArray() && Array.getLength(value) == 0){
                             continue;
                         }
-                        if(ignoreValue.ifEmptyList() && List.class.isAssignableFrom(field.getType())){
+                        if(iv.ifEmptyList() && List.class.isAssignableFrom(field.getType())){
                             if(((List) value).isEmpty()){
                                 continue;
                             }
                         }
-                        if(ignoreValue.ifEmptyString() && CharSequence.class.isAssignableFrom(field.getType())){
+                        if(iv.ifEmptyString() && CharSequence.class.isAssignableFrom(field.getType())){
                             if(((CharSequence) value).length() == 0){
                                 continue;
                             }
                         }
-                    } else if(ignoreValue.ifNull()){
+                    } else if(iv.ifNull()){
                         continue;
                     }
                 }
 
                 if(value != null && entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(field.getType())){
-                        List<?> olist = (List<?>) value;
-                        if(!olist.isEmpty()){
+                        List<?> list = (List<?>) value;
+                        if(!list.isEmpty()){
                             List<Object> nlist = new ArrayList<>();
-                            for(Object o : olist){
+                            for(Object o : list){
                                 if(entry.getValueSchema() != null && o instanceof ConfigurationSection){
                                     nlist.add(readConfig((ConfigurationSection) o, entry.getValueSchema()));
                                 } else if(entry.isPrettyEnum() && o instanceof String) {
@@ -109,22 +112,23 @@ public class ConfigHelper {
                     else if(field.getType().isArray()){
                         int len = Array.getLength(value);
                         if(len > 0){
-                            Object n = Array.newInstance(entry.getComponentClass(), len);
+                            Object arr = Array.newInstance(entry.getComponentClass(), len);
                             for(int i = 0; i < len; i++){
                                 Object o = Array.get(value, i);
                                 if(entry.getValueSchema() != null && o instanceof ConfigurationSection){
-                                    Array.set(n, i, readConfig((ConfigurationSection) o, entry.getValueSchema()));
+                                    Array.set(arr, i, readConfig((ConfigurationSection) o, entry.getValueSchema()));
                                 } else if(entry.isPrettyEnum() && o instanceof String) {
-                                    Array.set(n, i, EnumUtil.findEnum((Class<? extends Enum>) entry.getComponentClass(), (String) o));
+                                    Array.set(arr, i, EnumUtil.findEnum((Class<? extends Enum>) entry.getComponentClass(), (String) o));
                                 } else if(!entry.getComponentClass().isPrimitive() || o != null) {
-                                    Array.set(n, i, o);
+                                    Array.set(arr, i, o);
                                 }
                             }
-                            value = n;
+                            value = arr;
                         }
                     }
                 }
             }
+
             if(!field.getType().isPrimitive() || value != null) {
                 try {
                     field.set(object, value);
@@ -139,9 +143,12 @@ public class ConfigHelper {
     public static <T> void writeConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema, @Nullable Object object) {
         Preconditions.checkNotNull(bukkitConf);
         Preconditions.checkNotNull(configSchema);
+
         for (String k : configSchema.listKeys()) {
             ConfigSchema.Entry entry = configSchema.getEntry(k);
-            if (entry == null) continue;
+            if (entry == null) {
+                continue;
+            }
 
             Object value = configSchema.getValue(entry, object);
             value = configSchema.callMiddleware(entry, value, object, Middleware.Direction.SCHEMA_TO_CONFIG);
@@ -155,22 +162,22 @@ public class ConfigHelper {
                     value = conf;
                 } else if(entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(value.getClass())){
-                        List<?> olist = (List<?>) value;
-                        if(!olist.isEmpty()){
+                        List<?> list = (List<?>) value;
+                        if(!list.isEmpty()){
                             if(entry.isPrettyEnum()){
-                                List<Object> nlist = new ArrayList<>();
-                                for(Object o : olist){
-                                    nlist.add(o.toString());
+                                List<Object> newList = new ArrayList<>();
+                                for(Object o : list){
+                                    newList.add(o.toString());
                                 }
-                                value = nlist;
+                                value = newList;
                             } else if(entry.getValueSchema() != null){
-                                List<Object> nlist = new ArrayList<>();
-                                for(Object o : olist){
+                                List<Object> newList = new ArrayList<>();
+                                for(Object o : list){
                                     YamlConfiguration conf = new YamlConfiguration();
                                     writeConfig(conf, entry.getValueSchema(), o);
-                                    nlist.add(conf);
+                                    newList.add(conf);
                                 }
-                                value = nlist;
+                                value = newList;
                             }
                         }
                     }
@@ -178,25 +185,26 @@ public class ConfigHelper {
                         int len = Array.getLength(value);
                         if(len > 0){
                             if(entry.isPrettyEnum()) {
-                                Object[] n = new Object[len];
+                                Object[] arr = new Object[len];
                                 for (int i = 0; i < len; i++) {
-                                    n[i] = Array.get(value, i).toString();
+                                    arr[i] = Array.get(value, i).toString();
                                 }
-                                value = n;
+                                value = arr;
                             } else if(entry.getValueSchema() != null){
-                                Object[] n = new Object[len];
+                                Object[] arr = new Object[len];
                                 for (int i = 0; i < len; i++) {
                                     Object o = Array.get(value, i);
                                     YamlConfiguration conf = new YamlConfiguration();
                                     writeConfig(conf, entry.getValueSchema(), o);
-                                    n[i] = conf;
+                                    arr[i] = conf;
                                 }
-                                value = n;
+                                value = arr;
                             }
                         }
                     }
                 }
             }
+
             bukkitConf.set(k, value);
         }
     }
