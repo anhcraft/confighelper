@@ -3,7 +3,6 @@ package dev.anhcraft.confighelper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import dev.anhcraft.confighelper.annotation.*;
-import dev.anhcraft.confighelper.impl.TwoWayMiddleware;
 import org.apache.commons.lang.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +11,8 @@ import java.lang.reflect.*;
 import java.util.*;
 
 public class ConfigSchema<T> {
+    private static final Map<Class<?>, ConfigSchema<?>> CACHE = new WeakHashMap<>();
+
     @NotNull
     public static <T> ConfigSchema<T> of(@NotNull Class<T> schemaClass){
         Preconditions.checkNotNull(schemaClass);
@@ -20,15 +21,25 @@ public class ConfigSchema<T> {
     }
 
     private static <T> ConfigSchema<T> fSchema(Class<T> schemaClass){
-        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass);
-        Class<?> clazz = schemaClass;
-        Field[] fields = clazz.getDeclaredFields();
-        Method[] methods = clazz.getDeclaredMethods();
-        while(!Objects.equals(clazz = clazz.getSuperclass(), Object.class)){
-            if(!clazz.isAnnotationPresent(Schema.class)) break;
-            fields = (Field[]) ArrayUtils.addAll(fields, clazz.getDeclaredFields());
-            methods = (Method[]) ArrayUtils.addAll(methods, clazz.getDeclaredMethods());
+        ConfigSchema<?> cachedConfSchema = CACHE.get(schemaClass);
+        if(cachedConfSchema != null) {
+            return (ConfigSchema<T>) cachedConfSchema;
         }
+        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass);
+        CACHE.put(schemaClass, configSchema);
+
+        Class<?> tempClazz = schemaClass;
+        Field[] fields = tempClazz.getDeclaredFields();
+        Method[] methods = tempClazz.getDeclaredMethods();
+
+        while(!Objects.equals(tempClazz = tempClazz.getSuperclass(), Object.class)){
+            if(!tempClazz.isAnnotationPresent(Schema.class)) {
+                break;
+            }
+            fields = (Field[]) ArrayUtils.addAll(fields, tempClazz.getDeclaredFields());
+            methods = (Method[]) ArrayUtils.addAll(methods, tempClazz.getDeclaredMethods());
+        }
+
         for(Field f : fields) {
             f.setAccessible(true);
             Key key = f.getAnnotation(Key.class);
@@ -36,16 +47,16 @@ public class ConfigSchema<T> {
             Explanation explanation = f.getAnnotation(Explanation.class);
             IgnoreValue ignoreValue = f.getAnnotation(IgnoreValue.class);
             Validation validation = f.getAnnotation(Validation.class);
-            ConfigSchema ss = null;
+            ConfigSchema valueSchema = null;
             Class<?> componentClass = null;
             boolean prettyEnum = f.getType().isEnum() && f.isAnnotationPresent(PrettyEnum.class);
 
             if(f.getType().isAnnotationPresent(Schema.class)) {
-                ss = fSchema(f.getType());
+                valueSchema = fSchema(f.getType());
             } else if(f.getType().isArray()){
                 componentClass = f.getType().getComponentType();
                 if(componentClass.isAnnotationPresent(Schema.class)){
-                    ss = fSchema(componentClass);
+                    valueSchema = fSchema(componentClass);
                 } else if(componentClass.isEnum() && f.isAnnotationPresent(PrettyEnum.class)){
                     prettyEnum = true;
                 }
@@ -57,7 +68,7 @@ public class ConfigSchema<T> {
                         Class<?> ac = Class.forName(pType.getActualTypeArguments()[0].getTypeName());
                         componentClass = ac;
                         if(ac.isAnnotationPresent(Schema.class)){
-                            ss = fSchema(ac);
+                            valueSchema = fSchema(ac);
                         } else if(ac.isEnum() && f.isAnnotationPresent(PrettyEnum.class)){
                             prettyEnum = true;
                         }
@@ -66,7 +77,7 @@ public class ConfigSchema<T> {
                 }
             }
 
-            Entry e = new Entry(f, key, explanation, validation, ignoreValue, prettyEnum, ss, componentClass);
+            Entry e = new Entry(f, key, explanation, validation, ignoreValue, prettyEnum, valueSchema, componentClass);
             configSchema.entries.put(e.getKey(), e);
         }
 
