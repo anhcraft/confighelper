@@ -17,7 +17,7 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <!-- The minimum version. Check the Bukkit pom.xml to know -->
-            <version>17.0</version>
+            <version>23.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
