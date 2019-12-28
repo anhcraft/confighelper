@@ -23,6 +23,18 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ConfigHelper {
+    private static final EntryFilter DEFAULT_ENTRY_FILTER = newOptions();
+
+    @NotNull
+    public static EntryFilter newOptions(){
+        return new EntryFilter() {
+            @Override
+            protected boolean isSection(Object val) {
+                return val instanceof ConfigurationSection;
+            }
+        };
+    }
+
     @NotNull
     public static <T> T readConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema) throws InvalidValueException {
         return readConfig(bukkitConf, configSchema, configSchema.newInstance());
@@ -141,8 +153,13 @@ public class ConfigHelper {
     }
 
     public static <T> void writeConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema, @Nullable Object object) {
+        writeConfig(bukkitConf, configSchema, object, DEFAULT_ENTRY_FILTER);
+    }
+
+    public static <T> void writeConfig(@NotNull ConfigurationSection bukkitConf, @NotNull ConfigSchema<T> configSchema, @Nullable Object object, @NotNull EntryFilter filter) {
         Preconditions.checkNotNull(bukkitConf);
         Preconditions.checkNotNull(configSchema);
+        Preconditions.checkNotNull(filter);
 
         for (String k : configSchema.listKeys()) {
             ConfigSchema.Entry entry = configSchema.getEntry(k);
@@ -158,7 +175,7 @@ public class ConfigHelper {
                     value = value.toString();
                 } else if(entry.getValueSchema() != null && value.getClass().isAnnotationPresent(Schema.class)){
                     YamlConfiguration conf = new YamlConfiguration();
-                    writeConfig(conf, entry.getValueSchema(), value);
+                    writeConfig(conf, entry.getValueSchema(), value, filter);
                     value = conf;
                 } else if(entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(value.getClass())){
@@ -174,7 +191,7 @@ public class ConfigHelper {
                                 List<Object> newList = new ArrayList<>();
                                 for(Object o : list){
                                     YamlConfiguration conf = new YamlConfiguration();
-                                    writeConfig(conf, entry.getValueSchema(), o);
+                                    writeConfig(conf, entry.getValueSchema(), o, filter);
                                     newList.add(conf);
                                 }
                                 value = newList;
@@ -195,7 +212,7 @@ public class ConfigHelper {
                                 for (int i = 0; i < len; i++) {
                                     Object o = Array.get(value, i);
                                     YamlConfiguration conf = new YamlConfiguration();
-                                    writeConfig(conf, entry.getValueSchema(), o);
+                                    writeConfig(conf, entry.getValueSchema(), o, filter);
                                     arr[i] = conf;
                                 }
                                 value = arr;
@@ -205,7 +222,10 @@ public class ConfigHelper {
                 }
             }
 
-            bukkitConf.set(k, value);
+
+            if(filter.check(value)) {
+                bukkitConf.set(k, value);
+            }
         }
     }
 }

@@ -36,7 +36,7 @@ public class Main {
         earth.setAge(2000000);
         earth.getCountries().add(country);
         YamlConfiguration configuration1 = new YamlConfiguration();
-        ConfigHelper.writeConfig(configuration1, Earth.SCHEMA, earth);
+        ConfigHelper.writeConfig(configuration1, Earth.SCHEMA, earth, ConfigHelper.newOptions().ignoreFalse().ignoreZero());
         String conf = configuration1.saveToString();
         System.out.println(conf);
         YamlConfiguration configuration2 = new YamlConfiguration();
@@ -45,6 +45,5 @@ public class Main {
         } catch (InvalidValueException e) {
             e.printStackTrace();
         }
-        Assert.assertEquals(conf, configuration2.saveToString());
     }
 }
