@@ -47,28 +47,33 @@ public abstract class EntryFilter {
         this.ignoreFalse = true;
         return this;
     }
-    
-    protected abstract boolean isSection(Object val);
+
+    protected abstract boolean checkSection(Object val);
 
     @SuppressWarnings("RedundantIfStatement")
     protected boolean check(Object value){
+        if(value == null) return true;
         if(ignoreFalse && value instanceof Boolean && !((Boolean) value)){
             return false;
         }
-        else if(ignoreZero){
+        if(ignoreZero){
             if(value instanceof Byte && (Byte) value == 0) return false;
             else if(value instanceof Short && (Short) value == 0) return false;
             else if(value instanceof Integer && (Integer) value == 0) return false;
             else if(value instanceof Long && (Long) value == 0) return false;
             else if(value instanceof Float && (Float) value == 0) return false;
             else if(value instanceof Double && (Double) value == 0) return false;
-        } else if(ignoreEmptyArray && value instanceof Object[] && ((Object[]) value).length == 0){
+        }
+        if(ignoreEmptyArray && value instanceof Object[] && ((Object[]) value).length == 0){
             return false;
-        } else if(ignoreEmptyList && value instanceof List && ((List) value).isEmpty()){
+        }
+        if(ignoreEmptyList && value instanceof List && ((List) value).isEmpty()){
             return false;
-        } else if(ignoreEmptySection && isSection(value)){
+        }
+        if(ignoreEmptySection && checkSection(value)){
             return false;
-        } else if(ignoreEmptyString && value instanceof String && ((String) value).isEmpty()){
+        }
+        if(ignoreEmptyString && value instanceof String && ((String) value).isEmpty()){
             return false;
         }
         return true;

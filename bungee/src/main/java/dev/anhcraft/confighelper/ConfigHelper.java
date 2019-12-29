@@ -24,8 +24,8 @@ public class ConfigHelper {
     public static EntryFilter newOptions(){
         return new EntryFilter() {
             @Override
-            protected boolean isSection(Object val) {
-                return val instanceof Configuration;
+            protected boolean checkSection(Object val) {
+                return val instanceof Configuration && ((Configuration) val).getKeys().isEmpty();
             }
         };
     }

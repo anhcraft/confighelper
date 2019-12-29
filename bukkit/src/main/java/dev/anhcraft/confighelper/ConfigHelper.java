@@ -29,8 +29,8 @@ public class ConfigHelper {
     public static EntryFilter newOptions(){
         return new EntryFilter() {
             @Override
-            protected boolean isSection(Object val) {
-                return val instanceof ConfigurationSection;
+            protected boolean checkSection(Object val) {
+                return val instanceof ConfigurationSection && ((ConfigurationSection) val).getKeys(false).isEmpty();
             }
         };
     }
@@ -224,6 +224,7 @@ public class ConfigHelper {
 
 
             if(filter.check(value)) {
+                if(value != null)System.out.println( k+" "+value.getClass().getCanonicalName());
                 bukkitConf.set(k, value);
             }
         }
