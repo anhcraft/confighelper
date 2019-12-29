@@ -224,7 +224,6 @@ public class ConfigHelper {
 
 
             if(filter.check(value)) {
-                if(value != null)System.out.println( k+" "+value.getClass().getCanonicalName());
                 bukkitConf.set(k, value);
             }
         }
