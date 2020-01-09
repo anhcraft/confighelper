@@ -1,12 +1,13 @@
 package dev.anhcraft.confighelper.objects;
 
-import dev.anhcraft.confighelper.annotation.Key;
-import dev.anhcraft.confighelper.annotation.PrettyEnum;
-import dev.anhcraft.confighelper.annotation.Schema;
-import dev.anhcraft.confighelper.annotation.Validation;
+import dev.anhcraft.confighelper.annotation.*;
 import dev.anhcraft.confighelper.enums.Gender;
 
 @Schema
+@Example({
+        "name: Bob",
+        "gender: male"
+})
 public class Human extends Ageable {
     @Key("name")
     @Validation(notNull = true)

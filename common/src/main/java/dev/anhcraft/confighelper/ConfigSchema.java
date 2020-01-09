@@ -29,7 +29,7 @@ public class ConfigSchema<T> {
         if(schemaClass.isAnnotationPresent(Explanation.class)){
             expl = schemaClass.getAnnotation(Explanation.class).value();
         }
-        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass, expl);
+        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass, expl, schemaClass.getAnnotation(ExampleList.class));
         CACHE.put(schemaClass, configSchema);
 
         Class<?> tempClazz = schemaClass;
@@ -52,6 +52,7 @@ public class ConfigSchema<T> {
             Explanation explanation = f.getAnnotation(Explanation.class);
             IgnoreValue ignoreValue = f.getAnnotation(IgnoreValue.class);
             Validation validation = f.getAnnotation(Validation.class);
+            ExampleList exampleList = f.getAnnotation(ExampleList.class);
             ConfigSchema valueSchema = null;
             Class<?> componentClass = null;
             boolean prettyEnum = f.getType().isEnum() && f.isAnnotationPresent(PrettyEnum.class);
@@ -82,7 +83,7 @@ public class ConfigSchema<T> {
                 }
             }
 
-            Entry e = new Entry(f, key, explanation, validation, ignoreValue, prettyEnum, valueSchema, componentClass);
+            Entry e = new Entry(f, key, explanation, validation, ignoreValue, componentClass, prettyEnum, valueSchema, exampleList);
             configSchema.entries.put(e.getKey(), e);
         }
 
@@ -103,11 +104,13 @@ public class ConfigSchema<T> {
     private final Map<String, Entry> entries = new LinkedHashMap<>();
     private final Map<Method, Middleware.Direction> middleware = new HashMap<>();
     private final String[] explanation;
+    private ExampleList exampleList;
 
-    public ConfigSchema(@NotNull Class<T> schemaClass, @Nullable String[] explanation) {
+    public ConfigSchema(@NotNull Class<T> schemaClass, @Nullable String[] explanation, @Nullable ExampleList exampleList) {
         Preconditions.checkNotNull(schemaClass);
         this.schemaClass = schemaClass;
         this.explanation = explanation;
+        this.exampleList = exampleList;
     }
 
     @SuppressWarnings("unchecked")
@@ -248,6 +251,11 @@ public class ConfigSchema<T> {
         return builder.toString();
     }
 
+    @Nullable
+    public ExampleList getExampleList() {
+        return exampleList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -255,7 +263,9 @@ public class ConfigSchema<T> {
         ConfigSchema<?> schema = (ConfigSchema<?>) o;
         return schemaClass.equals(schema.schemaClass) &&
                 entries.equals(schema.entries) &&
-                middleware.equals(schema.middleware);
+                middleware.equals(schema.middleware) &&
+                Objects.equals(explanation, schema.explanation) &&
+                Objects.equals(exampleList, schema.exampleList);
     }
 
     @Override
@@ -270,19 +280,21 @@ public class ConfigSchema<T> {
         private Validation validation;
         private IgnoreValue ignoreValue;
         private boolean prettyEnum;
-        private ConfigSchema configSchema;
+        private ExampleList exampleList;
+        private ConfigSchema valueSchema;
         private Class<?> componentClass;
 
-        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, boolean prettyEnum, @Nullable ConfigSchema configSchema, @Nullable Class<?> componentClass) {
-            this.prettyEnum = prettyEnum;
+        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, @Nullable Class<?> componentClass, boolean prettyEnum, @Nullable ConfigSchema valueSchema, @Nullable ExampleList exampleList) {
             Preconditions.checkNotNull(field);
             this.field = field;
             this.key = key;
             this.explanation = explanation;
             this.validation = validation;
             this.ignoreValue = ignoreValue;
-            this.configSchema = configSchema;
+            this.valueSchema = valueSchema;
+            this.prettyEnum = prettyEnum;
             this.componentClass = componentClass;
+            this.exampleList = exampleList;
         }
 
         @NotNull
@@ -312,7 +324,7 @@ public class ConfigSchema<T> {
 
         @Nullable
         public ConfigSchema<?> getValueSchema() {
-            return configSchema;
+            return valueSchema;
         }
 
         @Nullable
@@ -322,6 +334,11 @@ public class ConfigSchema<T> {
 
         public boolean isPrettyEnum() {
             return prettyEnum;
+        }
+
+        @Nullable
+        public ExampleList getExampleList() {
+            return exampleList;
         }
 
         @Override
@@ -335,8 +352,9 @@ public class ConfigSchema<T> {
                     Objects.equals(explanation, entry.explanation) &&
                     Objects.equals(validation, entry.validation) &&
                     Objects.equals(ignoreValue, entry.ignoreValue) &&
-                    Objects.equals(configSchema, entry.configSchema) &&
-                    Objects.equals(componentClass, entry.componentClass);
+                    Objects.equals(valueSchema, entry.valueSchema) &&
+                    Objects.equals(componentClass, entry.componentClass) &&
+                    Objects.equals(exampleList, entry.exampleList);
         }
 
         @Override
