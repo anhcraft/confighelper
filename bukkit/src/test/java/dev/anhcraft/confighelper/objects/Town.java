@@ -6,6 +6,7 @@ import dev.anhcraft.confighelper.annotation.Schema;
 import dev.anhcraft.confighelper.annotation.Validation;
 
 @Schema
+@Explanation("Town configuration")
 public class Town {
     @Key("houses")
     @Explanation({

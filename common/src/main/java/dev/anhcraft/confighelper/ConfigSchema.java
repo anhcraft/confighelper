@@ -25,7 +25,11 @@ public class ConfigSchema<T> {
         if(cachedConfSchema != null) {
             return (ConfigSchema<T>) cachedConfSchema;
         }
-        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass);
+        String[] expl = null;
+        if(schemaClass.isAnnotationPresent(Explanation.class)){
+            expl = schemaClass.getAnnotation(Explanation.class).value();
+        }
+        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass, expl);
         CACHE.put(schemaClass, configSchema);
 
         Class<?> tempClazz = schemaClass;
@@ -98,10 +102,12 @@ public class ConfigSchema<T> {
     private final Class<T> schemaClass;
     private final Map<String, Entry> entries = new LinkedHashMap<>();
     private final Map<Method, Middleware.Direction> middleware = new HashMap<>();
+    private final String[] explanation;
 
-    public ConfigSchema(@NotNull Class<T> schemaClass) {
+    public ConfigSchema(@NotNull Class<T> schemaClass, @Nullable String[] explanation) {
         Preconditions.checkNotNull(schemaClass);
         this.schemaClass = schemaClass;
+        this.explanation = explanation;
     }
 
     @SuppressWarnings("unchecked")
@@ -114,6 +120,11 @@ public class ConfigSchema<T> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Nullable
+    public String[] getExplanation() {
+        return explanation;
     }
 
     @NotNull
