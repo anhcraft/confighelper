@@ -36,11 +36,12 @@ public class ConfigSchema<T> {
             if(!tempClazz.isAnnotationPresent(Schema.class)) {
                 break;
             }
-            fields = (Field[]) ArrayUtil.concat(fields, tempClazz.getDeclaredFields());
-            methods = (Method[]) ArrayUtil.concat(methods, tempClazz.getDeclaredMethods());
+            fields = ArrayUtil.concat(fields, tempClazz.getDeclaredFields());
+            methods = ArrayUtil.concat(methods, tempClazz.getDeclaredMethods());
         }
 
-        for(Field f : fields) {
+        for(int i = fields.length - 1; i >= 0; i--) { // trick to reverse the arrays order
+            Field f = fields[i];
             f.setAccessible(true);
             Key key = f.getAnnotation(Key.class);
             if(key == null) continue;
@@ -95,7 +96,7 @@ public class ConfigSchema<T> {
     }
 
     private final Class<T> schemaClass;
-    private final Map<String, Entry> entries = new HashMap<>();
+    private final Map<String, Entry> entries = new LinkedHashMap<>();
     private final Map<Method, Middleware.Direction> middleware = new HashMap<>();
 
     public ConfigSchema(@NotNull Class<T> schemaClass) {
