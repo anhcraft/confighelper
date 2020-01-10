@@ -20,7 +20,6 @@ public class ConfigDocGenerator {
     private static final ResourceLoader resourceLoader = new ResourceLoader();
     private final List<ConfigSchema<?>> schemas = new ArrayList<>();
     private final Map<Pattern, String> javaDocs = new HashMap<>();
-    private String footer = "<footer>Powered by ConfigDoc/<a href=\"https://github.com/anhcraft/confighelper/\">ConfigHelper</a></footer>";
 
     public ConfigDocGenerator(){
         addJavadoc("(org.bukkit.*)|(org.spigotmc*)", "https://hub.spigotmc.org/javadocs/spigot/");
@@ -28,7 +27,7 @@ public class ConfigDocGenerator {
     }
 
     @Contract("_ -> this")
-    public ConfigDocGenerator with(@NotNull ConfigDocGenerator configDocGenerator){
+    public ConfigDocGenerator combineWith(@NotNull ConfigDocGenerator configDocGenerator){
         Preconditions.checkNotNull(configDocGenerator);
         schemas.addAll(configDocGenerator.schemas);
         javaDocs.putAll(configDocGenerator.javaDocs);
@@ -49,13 +48,6 @@ public class ConfigDocGenerator {
         return this;
     }
 
-    @Contract("_ -> this")
-    public ConfigDocGenerator footer(@NotNull String footer){
-        Preconditions.checkNotNull(footer);
-        this.footer = footer;
-        return this;
-    }
-
     @Contract("_, _ -> this")
     public ConfigDocGenerator addJavadoc(@NotNull String classPattern, @NotNull String link){
         Preconditions.checkNotNull(classPattern);
@@ -65,7 +57,6 @@ public class ConfigDocGenerator {
     @Contract("_, _ -> this")
     public ConfigDocGenerator addJavadoc(@NotNull Pattern classPattern, @NotNull String link){
         Preconditions.checkNotNull(classPattern);
-        Preconditions.checkNotNull(footer);
         if(!link.endsWith("/")) link = link + '/';
         javaDocs.put(classPattern, link);
         return this;
