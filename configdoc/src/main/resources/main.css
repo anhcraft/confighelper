@@ -87,6 +87,9 @@ header {
 
 .examples {
     display: none;
+    overflow-y: auto;
+    height: 300px;
+    resize: vertical;
 }
 
 .examples pre {
