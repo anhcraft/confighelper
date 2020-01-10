@@ -6,11 +6,12 @@
 
     <groupId>dev.anhcraft</groupId>
     <artifactId>confighelper</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>common</module>
+        <module>configdoc</module>
         <module>bungee</module>
         <module>bukkit</module>
     </modules>

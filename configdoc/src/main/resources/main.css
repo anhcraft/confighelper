@@ -1,0 +1,96 @@
+body {
+    font-family: monospace;
+    font-size: 16px;
+    padding: 25px 50px;
+    margin-bottom: 200px;
+}
+
+button::-moz-focus-inner {
+    border: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #19afdc;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    background: #f2d9ff;
+    width: 100%;
+    padding: 5px;
+    text-align: center;
+    font-size: 14px;
+    box-shadow: #676767 1px 1px 10px;
+}
+
+table {
+    width: 100%;
+    font-size: 14px;
+}
+
+table th {
+    font-size: 16px;
+    background-color: #63c37c;
+}
+
+table,
+table td,
+table th {
+    border: 1px solid #555;
+    border-collapse: collapse;
+    padding: 7px 12px;
+}
+
+table tr:hover {
+    background: #eee;
+}
+
+header {
+    padding: 15px 20px;
+}
+
+#container {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto;
+    grid-gap: 20px;
+}
+
+#right-side {
+    grid-column: 2 / 6;
+}
+
+#left-side {
+    border-right: 1px #e6e6e6 solid;
+    padding: 0 20px;
+    font-size: 16px;
+}
+
+.schema-explanation {
+    font-size: 15px;
+    font-weight: 100;
+    padding-left: 25px;
+    font-style: italic;
+}
+
+#toggle-example {
+    font-size: 12px;
+    padding: 8px 12px;
+    border: none;
+    background-color: #bd4f4f;
+    color: #fff;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.examples {
+    display: none;
+}
+
+.examples pre {
+    background-color: #e1e1e1;
+    padding: 8px 10px;
+    font-size: 12px;
+}
