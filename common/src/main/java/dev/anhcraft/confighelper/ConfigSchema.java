@@ -29,7 +29,9 @@ public class ConfigSchema<T> {
         if(schemaClass.isAnnotationPresent(Explanation.class)){
             expl = schemaClass.getAnnotation(Explanation.class).value();
         }
-        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass, expl, schemaClass.getAnnotation(ExampleList.class));
+        Example ex = schemaClass.getAnnotation(Example.class);
+        ExampleList exl = schemaClass.getAnnotation(ExampleList.class);
+        ConfigSchema<T> configSchema = new ConfigSchema<>(schemaClass, expl, exl != null ? exl.value() : (ex != null ? new Example[]{ex} : null));
         CACHE.put(schemaClass, configSchema);
 
         Class<?> tempClazz = schemaClass;
@@ -52,6 +54,7 @@ public class ConfigSchema<T> {
             Explanation explanation = f.getAnnotation(Explanation.class);
             IgnoreValue ignoreValue = f.getAnnotation(IgnoreValue.class);
             Validation validation = f.getAnnotation(Validation.class);
+            Example example = f.getAnnotation(Example.class);
             ExampleList exampleList = f.getAnnotation(ExampleList.class);
             ConfigSchema valueSchema = null;
             Class<?> componentClass = null;
@@ -83,7 +86,7 @@ public class ConfigSchema<T> {
                 }
             }
 
-            Entry e = new Entry(f, key, explanation, validation, ignoreValue, componentClass, prettyEnum, valueSchema, exampleList);
+            Entry e = new Entry(f, key, explanation, validation, ignoreValue, componentClass, prettyEnum, valueSchema, exampleList != null ? exampleList.value() : (example != null ? new Example[]{example} : null));
             configSchema.entries.put(e.getKey(), e);
         }
 
@@ -104,13 +107,13 @@ public class ConfigSchema<T> {
     private final Map<String, Entry> entries = new LinkedHashMap<>();
     private final Map<Method, Middleware.Direction> middleware = new HashMap<>();
     private final String[] explanation;
-    private ExampleList exampleList;
+    private Example[] examples;
 
-    public ConfigSchema(@NotNull Class<T> schemaClass, @Nullable String[] explanation, @Nullable ExampleList exampleList) {
+    public ConfigSchema(@NotNull Class<T> schemaClass, @Nullable String[] explanation, @Nullable Example[] examples) {
         Preconditions.checkNotNull(schemaClass);
         this.schemaClass = schemaClass;
         this.explanation = explanation;
-        this.exampleList = exampleList;
+        this.examples = examples;
     }
 
     @SuppressWarnings("unchecked")
@@ -252,8 +255,8 @@ public class ConfigSchema<T> {
     }
 
     @Nullable
-    public ExampleList getExampleList() {
-        return exampleList;
+    public Example[] getExamples() {
+        return examples;
     }
 
     @Override
@@ -264,8 +267,8 @@ public class ConfigSchema<T> {
         return schemaClass.equals(schema.schemaClass) &&
                 entries.equals(schema.entries) &&
                 middleware.equals(schema.middleware) &&
-                Objects.equals(explanation, schema.explanation) &&
-                Objects.equals(exampleList, schema.exampleList);
+                Arrays.equals(explanation, schema.explanation) &&
+                Arrays.equals(examples, schema.examples);
     }
 
     @Override
@@ -280,11 +283,11 @@ public class ConfigSchema<T> {
         private Validation validation;
         private IgnoreValue ignoreValue;
         private boolean prettyEnum;
-        private ExampleList exampleList;
+        private Example[] examples;
         private ConfigSchema valueSchema;
         private Class<?> componentClass;
 
-        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, @Nullable Class<?> componentClass, boolean prettyEnum, @Nullable ConfigSchema valueSchema, @Nullable ExampleList exampleList) {
+        public Entry(@NotNull Field field, @NotNull Key key, @Nullable Explanation explanation, @Nullable Validation validation, @Nullable IgnoreValue ignoreValue, @Nullable Class<?> componentClass, boolean prettyEnum, @Nullable ConfigSchema valueSchema, @Nullable Example[] examples) {
             Preconditions.checkNotNull(field);
             this.field = field;
             this.key = key;
@@ -294,7 +297,7 @@ public class ConfigSchema<T> {
             this.valueSchema = valueSchema;
             this.prettyEnum = prettyEnum;
             this.componentClass = componentClass;
-            this.exampleList = exampleList;
+            this.examples = examples;
         }
 
         @NotNull
@@ -337,8 +340,8 @@ public class ConfigSchema<T> {
         }
 
         @Nullable
-        public ExampleList getExampleList() {
-            return exampleList;
+        public Example[] getExamples() {
+            return examples;
         }
 
         @Override
@@ -354,7 +357,7 @@ public class ConfigSchema<T> {
                     Objects.equals(ignoreValue, entry.ignoreValue) &&
                     Objects.equals(valueSchema, entry.valueSchema) &&
                     Objects.equals(componentClass, entry.componentClass) &&
-                    Objects.equals(exampleList, entry.exampleList);
+                    Arrays.equals(examples, entry.examples);
         }
 
         @Override
