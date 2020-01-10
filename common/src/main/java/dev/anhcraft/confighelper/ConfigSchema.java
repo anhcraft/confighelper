@@ -42,12 +42,11 @@ public class ConfigSchema<T> {
             if(!tempClazz.isAnnotationPresent(Schema.class)) {
                 break;
             }
-            fields = ArrayUtil.concat(fields, tempClazz.getDeclaredFields());
-            methods = ArrayUtil.concat(methods, tempClazz.getDeclaredMethods());
+            fields = ArrayUtil.concat(tempClazz.getDeclaredFields(), fields);
+            methods = ArrayUtil.concat(tempClazz.getDeclaredMethods(), methods);
         }
 
-        for(int i = fields.length - 1; i >= 0; i--) { // trick to reverse the arrays order
-            Field f = fields[i];
+        for(Field f : fields){
             f.setAccessible(true);
             Key key = f.getAnnotation(Key.class);
             if(key == null) continue;
