@@ -12,6 +12,14 @@ public abstract class EntryFilter {
     private boolean ignoreZero;
     private boolean ignoreFalse;
 
+    /**
+     * @deprecated Don't construct, call method {@code ConfigHelper#EntryFilter} to create a new one.
+     */
+    @Deprecated
+    public EntryFilter() {
+
+    }
+
     @Contract("-> this")
     public EntryFilter ignoreEmptyList() {
         this.ignoreEmptyList = true;
