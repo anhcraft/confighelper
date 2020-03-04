@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="configdoc" />
         <module name="confighelper.bungee" />
+        <module name="neep" />
         <module name="confighelper.common" />
         <module name="confighelper.bukkit" />
       </profile>
