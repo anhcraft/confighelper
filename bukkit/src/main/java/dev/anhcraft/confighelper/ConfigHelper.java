@@ -86,7 +86,7 @@ public class ConfigHelper {
                 if(entry.getIgnoreValue() != null){
                     IgnoreValue iv = entry.getIgnoreValue();
                     if(value != null){
-                        if(iv.ifEmptyArray() && Array.getLength(value) == 0){
+                        if(iv.ifEmptyArray() && value.getClass().isArray() && Array.getLength(value) == 0){
                             continue;
                         }
                         if(iv.ifEmptyList() && List.class.isAssignableFrom(field.getType())){

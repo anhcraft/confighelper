@@ -60,7 +60,7 @@ public class ConfigHelper {
                 if(entry.getValidation() != null){
                     Validation v = entry.getValidation();
                     if(value != null){
-                        if(v.notEmptyArray() && Array.getLength(value) == 0){
+                        if(v.notEmptyArray() && value.getClass().isArray() && Array.getLength(value) == 0){
                             throw new InvalidValueException(k, InvalidValueException.Reason.EMPTY_ARRAY);
                         }
                         if(v.notEmptyList() && List.class.isAssignableFrom(field.getType())){
