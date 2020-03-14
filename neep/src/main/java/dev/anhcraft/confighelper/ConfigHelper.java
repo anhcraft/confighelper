@@ -7,6 +7,7 @@ import dev.anhcraft.confighelper.annotation.Schema;
 import dev.anhcraft.confighelper.annotation.Validation;
 import dev.anhcraft.confighelper.exception.InvalidValueException;
 import dev.anhcraft.confighelper.utils.EnumUtil;
+import dev.anhcraft.jvmkit.utils.ArrayUtil;
 import dev.anhcraft.neep.NeepConfig;
 import dev.anhcraft.neep.struct.NeepComponent;
 import dev.anhcraft.neep.struct.NeepList;
@@ -178,9 +179,10 @@ public class ConfigHelper {
                 if(entry.isPrettyEnum() && value.getClass().isEnum()){
                     value = value.toString();
                 } else if(entry.getValueSchema() != null && value.getClass().isAnnotationPresent(Schema.class)){
-                    NeepConfig conf = NeepConfig.create();
+                    NeepSection section = new NeepSection(neepConfig.getRoot(), ArrayUtil.last(k.split("\\.")), null, new ArrayList<>());
+                    NeepConfig conf = NeepConfig.of(section);
                     writeConfig(conf, entry.getValueSchema(), value, filter);
-                    value = conf.getRoot();
+                    value = section;
                 } else if(entry.getComponentClass() != null){
                     if(List.class.isAssignableFrom(value.getClass())){
                         List<?> list = (List<?>) value;
@@ -192,11 +194,14 @@ public class ConfigHelper {
                                 }
                                 value = newList;
                             } else if(entry.getValueSchema() != null){
-                                List<Object> newList = new ArrayList<>();
+                                NeepList<NeepSection> newList = new NeepList<>(neepConfig.getRoot(), ArrayUtil.last(k.split("\\.")), null, new ArrayList<>());
+                                int i = 0;
                                 for(Object o : list){
-                                    NeepConfig conf = NeepConfig.create();
+                                    NeepSection section = new NeepSection(newList, Integer.toString(i), null, new ArrayList<>());
+                                    NeepConfig conf = NeepConfig.of(section);
                                     writeConfig(conf, entry.getValueSchema(), o, filter);
-                                    newList.add(conf.getRoot());
+                                    newList.add(section);
+                                    i++;
                                 }
                                 value = newList;
                             }
@@ -212,14 +217,15 @@ public class ConfigHelper {
                                 }
                                 value = arr;
                             } else if(entry.getValueSchema() != null){
-                                Object[] arr = new Object[len];
+                                NeepList<NeepSection> newList = new NeepList<>(neepConfig.getRoot(), ArrayUtil.last(k.split("\\.")), null, new ArrayList<>());
                                 for (int i = 0; i < len; i++) {
                                     Object o = Array.get(value, i);
-                                    NeepConfig conf = NeepConfig.create();
+                                    NeepSection section = new NeepSection(newList, Integer.toString(i), null, new ArrayList<>());
+                                    NeepConfig conf = NeepConfig.of(section);
                                     writeConfig(conf, entry.getValueSchema(), o, filter);
-                                    arr[i] = conf.getRoot();
+                                    newList.add(section);
                                 }
-                                value = arr;
+                                value = newList;
                             }
                         }
                     }
