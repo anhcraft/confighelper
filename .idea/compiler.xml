@@ -6,11 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="configdoc" />
-        <module name="confighelper.bungee" />
+        <module name="confighelper.configdoc" />
+        <module name="confighelper.bukkit" />
         <module name="neep" />
         <module name="confighelper.common" />
-        <module name="confighelper.bukkit" />
+        <module name="configdoc" />
+        <module name="confighelper.bungee" />
+        <module name="confighelper.neep" />
       </profile>
     </annotationProcessing>
   </component>

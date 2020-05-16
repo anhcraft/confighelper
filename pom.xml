@@ -25,8 +25,8 @@
 
     <repositories>
         <repository>
-            <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+            <id>mcvn-repo</id>
+            <url>https://repo.minecraftvn.net/repository/maven-public/</url>
         </repository>
         <repository>
             <id>bungeecord-repo</id>
@@ -59,8 +59,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <serverId>nexus</serverId>
-                    <nexusUrl>https://repo.anhcraft.dev/</nexusUrl>
+                    <serverId>nexus-mcvn</serverId>
+                    <nexusUrl>https://repo.minecraftvn.net/</nexusUrl>
                     <skipStaging>true</skipStaging>
                 </configuration>
             </plugin>
@@ -92,8 +92,12 @@
 
     <distributionManagement>
         <repository>
-            <id>nexus</id>
-            <url>https://repo.anhcraft.dev/repository/mvn/</url>
+            <id>mcvn-releases</id>
+            <url>https://repo.minecraftvn.net/repository/maven-releases/</url>
         </repository>
+        <snapshotRepository>
+            <id>mcvn-snapshots</id>
+            <url>https://repo.minecraftvn.net/repository/maven-snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 </project>
